@@ -1,0 +1,13 @@
+:root{
+    --pastel-black: #100C09;
+}
+html, body {
+    margin: 0;
+    padding: 0;
+    background-color: var(--pastel-black);
+  }
+  #gameCanvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
