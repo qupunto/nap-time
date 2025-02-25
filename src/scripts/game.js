@@ -15,25 +15,24 @@ export default class Game {
     }
     bindKeys() {
         document.addEventListener('keydown', (event) => {
-            if (!this.keysPressed[event.code]) 
-                this.keysPressed[event.code] = true;
-
             if (event.code === 'ArrowLeft') {
-                this.direction.x = this.constants.direction.left;
+                this.direction.x = this.constants.direction.LEFT;
             } else if (event.code === 'ArrowRight') {
-                this.direction.x = this.constants.direction.right;
-            } else if (event.code === 'ArrowUp') {
-                this.direction.y = this.constants.direction.up;
-            } else if (event.code === 'ArrowDown') {
-                this.direction.y = this.constants.direction.down;
+                this.direction.x = this.constants.direction.RIGHT;
+            } else if (event.code === 'ArrowUp' && !this.keysPressed[event.code]) {
+                this.animal.jump();
+            } else if (event.code === 'ArrowDown' && !this.keysPressed[event.code]) {
+                this.animal.slam();
             }
+            if (!this.keysPressed[event.code])
+                this.keysPressed[event.code] = true;
         });
-    
+
         document.addEventListener('keyup', (event) => {
             this.keysPressed[event.code] = false;
 
-            if(this.keysPressed["ArrowLeft"]) this.direction.x = this.constants.direction.left;
-            else if (this.keysPressed["ArrowRight"]) this.direction.x = this.constants.direction.right;
+            if(this.keysPressed["ArrowLeft"]) this.direction.x = this.constants.direction.LEFT;
+            else if (this.keysPressed["ArrowRight"]) this.direction.x = this.constants.direction.RIGHT;
             else this.direction.x = null;
 
         });
@@ -44,8 +43,7 @@ export default class Game {
         this.player = null;
     }
     update(){
-        if(this.direction?.x)
-            this.animal.update(this.direction.x);
+        this.animal.update(this.direction?.x);
     }
     draw(){
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
