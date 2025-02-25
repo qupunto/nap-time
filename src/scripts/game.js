@@ -56,10 +56,10 @@ export default class Game {
         requestAnimationFrame(this.gameLoop);
       }
 
-    start(){
+    start(type,animal){
         this.gameState=this.constants.gameStates.PLAYING;
-        this.animal = new Animal(this.constants.animalTypes.DIA, this.canvas, this.ctx);
-        this.gameType=this.constants.gameTypes.FEED;
+        this.animal = new Animal(animal, this.canvas, this.ctx);
+        this.gameType=type;
         this.gameLoop();
     }
 }

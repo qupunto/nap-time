@@ -1,5 +1,6 @@
 export default class Constants{
     constructor(){
+        this.full_stop=5;
         this.gravity=0.98;
         this.idle_counter=500;
         this.min_height=360;
@@ -19,6 +20,7 @@ export default class Constants{
         this.animalStates=Object.freeze({
             JUMPING: "jumping",
             DOUBLE_JUMPING: "double_jumping",
+            SLAMMING: "slamming",
             RESTING: "resting",
             EATING: "eating",
             MOVING: "moving",
@@ -34,19 +36,19 @@ export default class Constants{
         this.animalTypes=Object.freeze({
             "NIT": {
                 max_speed: 15,
-                acceleration: 1,
+                acceleration: 0.5,
                 type: "cat",
-                size: 50,
-                jumping_power: 15,
+                size: 25,
+                jumping_power: 22,
                 name: "Nit",
                 color: "gray"
             },
             "DIA": {
-                max_speed: 20,
-                acceleration: 1.5,
+                max_speed: 10,
+                acceleration: 0.4,
                 type: "cat",
-                size: 30,
-                jumping_power: 20,
+                size: 50,
+                jumping_power: 18,
                 name: "Dia",
                 color: "white"
             }

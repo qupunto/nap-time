@@ -17,9 +17,8 @@ export default class Animal {
   update(direction) {
     this.#update_horizontal_movement(direction);
     this.#update_vertical_movement();
-
-
     this.animalInBox();
+    this.#update_idle_animation();
   }
   draw() {
     this.ctx.fillStyle = this.animal.color;
@@ -40,10 +39,7 @@ export default class Animal {
       this.speed.x = 0;
     }
     if (
-      [
-        this.constants.animalStates.JUMPING,
-        this.constants.animalStates.DOUBLE_JUMPING,
-      ].includes(this.state) &&
+      this.#isAnimalAirborne() &&
       this.position.y > this.baseline
     ) {
       this.position.y = this.baseline;
@@ -51,9 +47,9 @@ export default class Animal {
     }
   }
   jump() {
-    console.log(this.state)
     if (this.state != this.constants.animalStates.DOUBLE_JUMPING) {
-      this.speed.y += this.animal.jumping_power;
+      // this.speed.y = this.speed.y<0 ? this.animal.jumping_power : this.speed.y + this.animal.jumping_power;
+      this.speed.y = this.animal.jumping_power;
       this.position.y -= this.speed.y;
       this.state =
         this.state === this.constants.animalStates.JUMPING
@@ -61,12 +57,19 @@ export default class Animal {
           : this.constants.animalStates.JUMPING;
     }
   }
-  slam() {}
+  slam() {
+    if (this.#isAnimalJumping()){
+      this.speed.y = -this.animal.max_speed*this.constants.full_stop;
+      this.position.y -= this.speed.y;
+      this.state = this.constants.animalStates.SLAMMING;
+    }
+    
+  }
   #update_horizontal_movement(direction){
     if (direction === this.constants.direction.LEFT) {
       this.speed.x =
         this.speed.x > 0
-          ? this.speed.x - (this.animal.acceleration^2)
+          ? this.speed.x - (this.animal.acceleration*this.constants.full_stop)
           : this.speed.x - this.animal.acceleration;
       this.speed.x = Math.max(this.speed.x, -this.animal.max_speed);
       this.speed.x =
@@ -78,7 +81,7 @@ export default class Animal {
     } else if (direction === this.constants.direction.RIGHT) {
       this.speed.x =
         this.speed.x < 0
-          ? this.speed.x + (this.animal.acceleration^2)
+          ? this.speed.x + (this.animal.acceleration*this.constants.full_stop)
           : this.speed.x + this.animal.acceleration;
       this.speed.x = Math.min(this.speed.x, this.animal.max_speed);
       this.speed.x =
@@ -87,12 +90,12 @@ export default class Animal {
     } else {
       this.speed.x =
         this.speed.x < 0
-          ? this.speed.x + (this.animal.acceleration^2)
+          ? this.speed.x + (this.animal.acceleration*this.constants.full_stop)
           : this.speed.x > 0
-          ? this.speed.x - (this.animal.acceleration^2)
+          ? this.speed.x - (this.animal.acceleration*this.constants.full_stop)
           : 0;
       this.speed.x =
-        Math.abs(this.speed.x) < (this.animal.acceleration^2)
+        Math.abs(this.speed.x) < (this.animal.acceleration*this.constants.full_stop)
           ? 0
           : this.speed.x;
       this.position.x = this.position.x + this.speed.x;
@@ -118,5 +121,11 @@ export default class Animal {
     if (this.idle_count > this.constants.idle_counter) {
       this.state = this.constants.animalStates.RESTING;
     }
+  }
+  #isAnimalJumping(){
+    return [this.constants.animalStates.JUMPING,this.constants.animalStates.DOUBLE_JUMPING].includes(this.state);
+  }
+  #isAnimalAirborne(){
+    return [this.constants.animalStates.JUMPING,this.constants.animalStates.DOUBLE_JUMPING, this.constants.animalStates.SLAMMING].includes(this.state);
   }
 }
