@@ -1,52 +1,52 @@
 export default class Constants{
     constructor(){
-        this.gravity=2;
+        this.gravity=0.98;
         this.idle_counter=500;
         this.min_height=360;
         this.min_width=480;
         this.framerate=1000/24;
         this.gameStates=Object.freeze({
-            SELECTING: Symbol("selecting"),
-            PLAYING: Symbol("playing"),
-            PAUSED:Symbol("paused"),
-            OVER: Symbol("over")
+            SELECTING: "selecting",
+            PLAYING: "playing",
+            PAUSED:"paused",
+            OVER: "over"
         });
         this.gameTypes=Object.freeze({
-            FEED: Symbol("feed"),
-            PLAY: Symbol("play"),
-            PAT: Symbol("pat")
+            FEED: "feed",
+            PLAY: "play",
+            PAT: "pat"
         });
         this.animalStates=Object.freeze({
-            JUMPING: Symbol("jumping"),
-            DOUBLE_JUMPING: Symbol("double_jumping"),
-            RESTING: Symbol("resting"),
-            EATING: Symbol("eating"),
-            MOVING: Symbol("moving"),
-            IDLE: Symbol("idle"),
-            PLAYING: Symbol("playing")
+            JUMPING: "jumping",
+            DOUBLE_JUMPING: "double_jumping",
+            RESTING: "resting",
+            EATING: "eating",
+            MOVING: "moving",
+            IDLE: "idle",
+            PLAYING: "playing"
         });
         this.direction=Object.freeze({
-            UP: Symbol("up"),
-            DOWN: Symbol("down"),
-            LEFT: Symbol("left"),
-            RIGHT: Symbol("right")
+            UP: "up",
+            DOWN: "down",
+            LEFT: "left",
+            RIGHT: "right"
         });
         this.animalTypes=Object.freeze({
             "NIT": {
-                max_speed: 25,
+                max_speed: 15,
                 acceleration: 1,
                 type: "cat",
-                size: 40,
-                jumping_power: 5,
+                size: 50,
+                jumping_power: 15,
                 name: "Nit",
                 color: "gray"
             },
             "DIA": {
-                max_speed: 30,
+                max_speed: 20,
                 acceleration: 1.5,
                 type: "cat",
-                size: 25,
-                jumping_power: 10,
+                size: 30,
+                jumping_power: 20,
                 name: "Dia",
                 color: "white"
             }

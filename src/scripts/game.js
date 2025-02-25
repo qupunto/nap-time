@@ -15,11 +15,12 @@ export default class Game {
     }
     bindKeys() {
         document.addEventListener('keydown', (event) => {
+            console.log(event.key, !Boolean(this.keysPressed[event.code]))
             if (event.code === 'ArrowLeft') {
                 this.direction.x = this.constants.direction.LEFT;
             } else if (event.code === 'ArrowRight') {
                 this.direction.x = this.constants.direction.RIGHT;
-            } else if (event.code === 'ArrowUp' && !this.keysPressed[event.code]) {
+            } else if (event.code === 'ArrowUp' && !Boolean(this.keysPressed[event.code])) {
                 this.animal.jump();
             } else if (event.code === 'ArrowDown' && !this.keysPressed[event.code]) {
                 this.animal.slam();
