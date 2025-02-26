@@ -1,65 +1,69 @@
-﻿import { default as Animal } from "./animal.js"
-import {default as Constants} from "./constants.js"
-export default class Game {
-    constructor(canvasId){
-        this.constants = new Constants();
+﻿import {Animal} from "./animal.js"
+import {constants} from "./constants.js";
+import {SolidRectangle} from "./solidRectangle.js";
+
+export class Game {
+    constructor(canvasId, animal) {
         this.canvas = document.getElementById(canvasId);
         this.ctx = this.canvas.getContext('2d');
-        this.canvas.height = Math.max(window.innerHeight,this.constants.min_height);
-        this.canvas.width = Math.max(window.innerWidth,this.constants.min_width);
-        this.animal = {};
-        this.direction = {};
+        this.canvas.height = Math.max(window.innerHeight, constants.min_height);
+        this.canvas.width = Math.max(window.innerWidth, constants.min_width);
+        this.animal = new Animal(animal, this.canvas.width / 2 - animal.size, this.canvas.height - 50);
         this.keysPressed = {};
         this.bindKeys();
         this.gameLoop = this.gameLoop.bind(this);
+        this.terrain = [];
+        this.#createTerrain();
     }
     bindKeys() {
         document.addEventListener('keydown', (event) => {
-            console.log(event.key, !Boolean(this.keysPressed[event.code]))
-            if (event.code === 'ArrowLeft') {
-                this.direction.x = this.constants.direction.LEFT;
-            } else if (event.code === 'ArrowRight') {
-                this.direction.x = this.constants.direction.RIGHT;
-            } else if (event.code === 'ArrowUp' && !Boolean(this.keysPressed[event.code])) {
-                this.animal.jump();
-            } else if (event.code === 'ArrowDown' && !this.keysPressed[event.code]) {
-                this.animal.slam();
-            }
             if (!this.keysPressed[event.code])
                 this.keysPressed[event.code] = true;
-        });
 
+            if (event.code === 'ArrowLeft') {
+                this.animal.keyLeft();
+            } else if (event.code === 'ArrowRight') {
+                this.animal.keyRight();
+            } else if (event.code === 'ArrowUp') {
+                this.animal.keyUp();
+            } else if (event.code === 'ArrowDown') {
+                this.animal.keyDown();
+            }
+        });
         document.addEventListener('keyup', (event) => {
             this.keysPressed[event.code] = false;
-
-            if(this.keysPressed["ArrowLeft"]) this.direction.x = this.constants.direction.LEFT;
-            else if (this.keysPressed["ArrowRight"]) this.direction.x = this.constants.direction.RIGHT;
-            else this.direction.x = null;
-
+            if (!this.keysPressed["ArrowLeft"] && !this.keysPressed["ArrowRight"])
+                this.animal.noKey();
         });
-      }
-    new(){
+    }
+    new() {
         this.score = 0;
-        this.gameState = this.constants.gameStates.SELECTING;
-        this.player = null;
+        this.gameState = constants.gameStates.SELECTING;
     }
-    update(){
-        this.animal.update(this.direction?.x);
+    update() {
+        this.animal.update(this.terrain);
     }
-    draw(){
+    draw() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        this.animal.draw();
+        this.terrain.forEach(element => {
+            element.draw(this.ctx);
+        });
+        this.animal.draw(this.ctx);
     }
     gameLoop() {
         this.update();
         this.draw();
         requestAnimationFrame(this.gameLoop);
-      }
+    }
 
-    start(type,animal){
-        this.gameState=this.constants.gameStates.PLAYING;
-        this.animal = new Animal(animal, this.canvas, this.ctx);
-        this.gameType=type;
+    start() {
+        this.gameState = constants.gameStates.PLAYING;
         this.gameLoop();
+    }
+    #createTerrain() {
+        this.terrain.push(new SolidRectangle(0, this.canvas.height, this.canvas.width, 50, { fillStyle: 'red' })); //bottom
+        this.terrain.push(new SolidRectangle(0, 0, this.canvas.width, 1, { fillStyle: 'green' })); //top
+        this.terrain.push(new SolidRectangle(0, this.canvas.height, 1, this.canvas.heigth, { fillStyle: 'yellow' })); //left
+        this.terrain.push(new SolidRectangle(this.canvas.width, this.canvas.height, 1, this.canvas.heigth, { fillStyle: 'blue' })); //right
     }
 }

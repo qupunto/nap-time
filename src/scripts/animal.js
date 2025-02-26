@@ -1,131 +1,149 @@
-import { default as Constants } from "./constants.js";
-export default class Animal {
-  constructor(animal, canvas, ctx) {
-    this.constants = new Constants();
-    this.canvas = canvas;
-    this.ctx = ctx;
+import {constants} from "./constants.js";
+import {SolidRectangle} from "./solidRectangle.js";
+
+export class Animal {
+  constructor(animal, initialX, initialY) {
     this.animal = animal;
-    this.state = this.constants.animalStates.IDLE;
-    this.baseline = this.canvas.height - 50 - this.animal.size;
-    this.position = {
-      x: this.canvas.width / 2 - this.animal.size,
-      y: this.baseline,
-    };
+    this.state = constants.animalStates.IDLE;
+    this.position = { x: initialX, y: initialY };
     this.speed = { x: 0, y: 0 };
     this.idle_count = 0;
+    this.moving = null;
   }
-  update(direction) {
-    this.#update_horizontal_movement(direction);
-    this.#update_vertical_movement();
-    this.animalInBox();
+  update(terrain = []) {
+    const newPosX = this.position.x + this.speed.x;
+    const newPosY = this.position.y - this.speed.y;
+    const width = this.animal.size;
+    const height = this.state === constants.animalStates.CORUCHING ? this.animal.size / 2 : this.animal.size;
+    const newHitBox = new SolidRectangle(newPosX, newPosY, width, height);
+    terrain.forEach(element => {
+      switch (newHitBox.collides(element)) {
+        case constants.direction.RIGHT:
+          this.speed.x = 0;
+          this.position.x = element.x - this.animal.size;
+          break;
+        case constants.direction.LEFT:
+          this.speed.x = 0;
+          this.position.x = element.x + element.width;
+          break;
+        case constants.direction.UP:
+          this.speed.y = 0;
+          this.position.y = element.y - this.animal.size;
+          break;
+        case constants.direction.DOWN:
+          this.speed.y = 0;
+          this.position.y = element.y + element.height;
+          break;
+        default:
+          this.position.y = newPosY;
+          this.position.x = newPosX;
+          break;
+      }
+    });
+    if (this.#isAirborne())
+      this.#gravity();
+    if (this.moving === null)
+      this.#inertia();
     this.#update_idle_animation();
   }
-  draw() {
-    this.ctx.fillStyle = this.animal.color;
-    this.ctx.fillRect(
-      this.position.x,
-      this.position.y,
-      this.animal.size,
-      this.animal.size
-    );
+  draw(ctx) {
+    const width = this.animal.size;
+    const height = this.state === constants.animalStates.CORUCHING ? this.animal.size / 2 : this.animal.size;
+    const animalBox = new SolidRectangle(this.position.x, this.position.y, width, height, { fillStyle: this.animal.color });
+    animalBox.draw(ctx);
   }
-  animalInBox() {
-    if (this.position.x <= 0) {
-      this.position.x = 0;
-      this.speed.x = 0;
-    }
-    if (this.position.x + this.animal.size >= this.canvas.width) {
-      this.position.x = this.canvas.width - this.animal.size;
-      this.speed.x = 0;
-    }
-    if (
-      this.#isAnimalAirborne() &&
-      this.position.y > this.baseline
-    ) {
-      this.position.y = this.baseline;
-      this.state = this.constants.animalStates.IDLE;
+  keyUp() {
+    switch (this.state) {
+      case constants.animalStates.JUMPING:
+        this.state = constants.animalStates.DOUBLE_JUMPING;
+        this.#jump()
+        break;
+      case constants.animalStates.DOUBLE_JUMPING:
+      case constants.animalStates.SLAMMING:
+        //DO NOTHING
+        break;
+      default:
+        this.state = constants.animalStates.JUMPING;
+        this.#jump();
+        break;
     }
   }
-  jump() {
-    if (this.state != this.constants.animalStates.DOUBLE_JUMPING) {
-      // this.speed.y = this.speed.y<0 ? this.animal.jumping_power : this.speed.y + this.animal.jumping_power;
-      this.speed.y = this.animal.jumping_power;
-      this.position.y -= this.speed.y;
-      this.state =
-        this.state === this.constants.animalStates.JUMPING
-          ? this.constants.animalStates.DOUBLE_JUMPING
-          : this.constants.animalStates.JUMPING;
+  keyDown() {
+    switch (this.state) {
+      case constants.animalStates.JUMPING:
+      case constants.animalStates.DOUBLE_JUMPING:
+        this.state = constants.animalStates.SLAMMING;
+        this.#slam();
+        break;
+      case constants.animalStates.SLAMMING:
+        //DO NOTHING
+        break;
+      default:
+        this.state = constants.animalStates.CORUCHING;
+        break;
     }
   }
-  slam() {
-    if (this.#isAnimalJumping()){
-      this.speed.y = -this.animal.max_speed*this.constants.full_stop;
-      this.position.y -= this.speed.y;
-      this.state = this.constants.animalStates.SLAMMING;
-    }
-    
+  keyLeft() {
+    this.speed.x =
+      this.speed.x > 0
+        ? this.speed.x - (this.animal.acceleration * constants.full_stop)
+        : this.speed.x - this.animal.acceleration;
+    this.speed.x = Math.max(this.speed.x, -this.animal.max_speed);
+    this.speed.x =
+      Math.abs(this.speed.x) < this.animal.acceleration ? 0 : this.speed.x;
+    if (this.speed.x !== 0)
+      this.moving = constants.direction.LEFT;
   }
-  #update_horizontal_movement(direction){
-    if (direction === this.constants.direction.LEFT) {
-      this.speed.x =
-        this.speed.x > 0
-          ? this.speed.x - (this.animal.acceleration*this.constants.full_stop)
-          : this.speed.x - this.animal.acceleration;
-      this.speed.x = Math.max(this.speed.x, -this.animal.max_speed);
-      this.speed.x =
-        Math.abs(this.speed.x) < this.animal.acceleration ? 0 : this.speed.x;
-      this.position.x =
-        this.position.x + this.speed.x <= 0
-          ? 0
-          : this.position.x + this.speed.x;
-    } else if (direction === this.constants.direction.RIGHT) {
-      this.speed.x =
-        this.speed.x < 0
-          ? this.speed.x + (this.animal.acceleration*this.constants.full_stop)
-          : this.speed.x + this.animal.acceleration;
-      this.speed.x = Math.min(this.speed.x, this.animal.max_speed);
-      this.speed.x =
-        Math.abs(this.speed.x) < this.animal.acceleration ? 0 : this.speed.x;
-      this.position.x = this.position.x + this.speed.x;
-    } else {
-      this.speed.x =
-        this.speed.x < 0
-          ? this.speed.x + (this.animal.acceleration*this.constants.full_stop)
-          : this.speed.x > 0
-          ? this.speed.x - (this.animal.acceleration*this.constants.full_stop)
+  keyRight() {
+    this.speed.x =
+      this.speed.x < 0
+        ? this.speed.x + (this.animal.acceleration * constants.full_stop)
+        : this.speed.x + this.animal.acceleration;
+    this.speed.x = Math.min(this.speed.x, this.animal.max_speed);
+    this.speed.x =
+      Math.abs(this.speed.x) < this.animal.acceleration ? 0 : this.speed.x;
+    if (this.speed.x !== 0)
+      this.moving = constants.direction.RIGHT;
+  }
+  noKey() {
+    this.moving = null;
+  }
+  #jump() {
+    this.speed.y = this.animal.jumping_power;
+  }
+  #slam() {
+    this.speed.y = -this.animal.max_speed * constants.full_stop;
+  }
+  #gravity() {
+    this.speed.y -= constants.gravity;
+  }
+  #inertia() {
+    this.speed.x =
+      this.speed.x < 0
+        ? this.speed.x + (this.animal.acceleration * constants.full_stop)
+        : this.speed.x > 0
+          ? this.speed.x - (this.animal.acceleration * constants.full_stop)
           : 0;
-      this.speed.x =
-        Math.abs(this.speed.x) < (this.animal.acceleration*this.constants.full_stop)
-          ? 0
-          : this.speed.x;
-      this.position.x = this.position.x + this.speed.x;
-    }
+    this.speed.x =
+      Math.abs(this.speed.x) < (this.animal.acceleration * constants.full_stop)
+        ? 0
+        : this.speed.x;
   }
-  #update_vertical_movement(){
-    if (this.position.y < this.baseline) {
-      this.speed.y -= this.constants.gravity;
-      this.position.y -= this.speed.y;
-    }else{
-      this.speed.y = 0;
-      this.position.y = this.baseline;
-      this.state= this.constants.animalStates.IDLE;
-    }
-  }
-  #update_idle_animation(){
-    if (this.state === this.constants.animalStates.IDLE) {
+  #update_idle_animation() {
+    if (this.state === constants.animalStates.IDLE) {
       this.idle_count++;
     }
-    else{
-      this.idle_count=0;
+    else {
+      this.idle_count = 0;
     }
-    if (this.idle_count > this.constants.idle_counter) {
-      this.state = this.constants.animalStates.RESTING;
+    if (this.idle_count > constants.idle_counter) {
+      this.state = constants.animalStates.RESTING;
     }
   }
-  #isAnimalJumping(){
-    return [this.constants.animalStates.JUMPING,this.constants.animalStates.DOUBLE_JUMPING].includes(this.state);
+  #isAirborne() {
+    return [constants.animalStates.JUMPING, constants.animalStates.DOUBLE_JUMPING, constants.animalStates.SLAMMING].includes(this.state);
   }
-  #isAnimalAirborne(){
-    return [this.constants.animalStates.JUMPING,this.constants.animalStates.DOUBLE_JUMPING, this.constants.animalStates.SLAMMING].includes(this.state);
+  #isMoving() {
+    return [constants.animalStates.MOVING, constants.animalStates.JUMPING, constants.animalStates.DOUBLE_JUMPING, constants.animalStates.SLAMMING].includes(this.state)
   }
 }
