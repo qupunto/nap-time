@@ -1,6 +1,6 @@
-﻿﻿import {Animal} from "./animal.js"
-import {constants} from "./constants.js";
-import {SolidRectangle} from "./solidRectangle.js";
+﻿import { Animal } from "./animal.js"
+import { constants } from "./constants.js";
+import { SolidRectangle } from "./solidRectangle.js";
 
 export class Game {
     constructor(canvasId, animal) {
@@ -8,7 +8,7 @@ export class Game {
         this.ctx = this.canvas.getContext('2d');
         this.canvas.height = Math.max(window.innerHeight, constants.min_height);
         this.canvas.width = Math.max(window.innerWidth, constants.min_width);
-        this.animal = new Animal(animal, this.canvas.width / 2 - animal.size, this.canvas.height - 50);
+        this.animal = new Animal(animal, this.canvas.width / 2 - animal.size, this.canvas.height - 20 - animal.size);
         this.keysPressed = {};
         this.bindKeys();
         this.gameLoop = this.gameLoop.bind(this);
@@ -32,8 +32,9 @@ export class Game {
         });
         document.addEventListener('keyup', (event) => {
             this.keysPressed[event.code] = false;
-            if (!this.keysPressed["ArrowLeft"] && !this.keysPressed["ArrowRight"])
-                this.animal.noKey();
+            if (this.keysPressed["ArrowLeft"]) { this.animal.keyLeft() }
+            else if (this.keysPressed["ArrowRight"]) { this.animal.keyRight() }
+            else { this.animal.noKey() }
         });
     }
     new() {
@@ -61,9 +62,13 @@ export class Game {
         this.gameLoop();
     }
     #createTerrain() {
-        this.terrain.push(new SolidRectangle(0, this.canvas.height, this.canvas.width, 50, { fillStyle: 'red' })); //bottom
-        this.terrain.push(new SolidRectangle(0, 0, this.canvas.width, 1, { fillStyle: 'green' })); //top
-        this.terrain.push(new SolidRectangle(0, this.canvas.height, 1, this.canvas.heigth, { fillStyle: 'yellow' })); //left
-        this.terrain.push(new SolidRectangle(this.canvas.width, this.canvas.height, 1, this.canvas.heigth, { fillStyle: 'blue' })); //right
+        this.terrain.push(new SolidRectangle(0, this.canvas.height - 20, this.canvas.width, 200, { fillStyle: 'green' })); //bottom
+        this.terrain.push(new SolidRectangle(0, 0, this.canvas.width, 5, { fillStyle: 'green' })); //top
+        this.terrain.push(new SolidRectangle(0, 0, 5, this.canvas.height, { fillStyle: 'green' })); //left
+        this.terrain.push(new SolidRectangle(this.canvas.width - 5, 0, 5, this.canvas.height, { fillStyle: 'green' })); //right
+        this.terrain.push(new SolidRectangle(5, this.canvas.height - 20 - 200, 400, 200, { fillStyle: 'blue' }));
+        this.terrain.push(new SolidRectangle(600, this.canvas.height - 20 - 400, 200, 20, { fillStyle: 'yellow' }));
+        this.terrain.push(new SolidRectangle(900, this.canvas.height - 20 - 600, 200, 20, { fillStyle: 'fuchsia' }));
+        this.terrain.push(new SolidRectangle(1200, this.canvas.height - 20 - 800, 200, 20, { fillStyle: 'red' }));
     }
 }

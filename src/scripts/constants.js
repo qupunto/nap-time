@@ -1,6 +1,6 @@
 export const constants = Object.freeze({
-    full_stop: 4,
-    gravity: 0.98,
+    full_stop: 1,
+    gravity: 1,
     idle_counter: 500,
     min_height: 360,
     min_width: 480,
@@ -20,7 +20,7 @@ export const constants = Object.freeze({
         JUMPING: "jumping",
         DOUBLE_JUMPING: "double_jumping",
         SLAMMING: "slamming",
-        CORUCHING: "crouching",
+        CROUCHING: "crouching",
         RESTING: "resting",
         EATING: "eating",
         MOVING: "moving",
@@ -29,11 +29,25 @@ export const constants = Object.freeze({
         HIDING: "hiding",
         CLIMBING: "climbing"
     },
+    collision: {
+        TOP: "collision_top",
+        BOTTOM: "collision_bottom",
+        LEFT: "collision_left",
+        RIGHT: "collision_right",
+        FRONT: "collision_front",
+        BACK: "collision_back",
+        CORNER_TOP_RIGHT: "collision_corner_top_right",
+        CORNER_BOTTOM_RIGHT: "collision_corner_bottom_right",
+        CORNER_TOP_LEFT: "collision_corner_top_left",
+        CORNER_BOTTOM_LEFT: "collision_corner_bottom_left",
+        NONE: "collision_none"
+    },
     direction: {
-        UP: "up",
-        DOWN: "down",
-        LEFT: "left",
-        RIGHT: "right"
+        UP: "direction_up",
+        DOWN: "direction_down",
+        LEFT: "direction_left",
+        RIGHT: "direction_right",
+        NONE: "direction_none"
     },
     animalTypes: {
         NIT: {
