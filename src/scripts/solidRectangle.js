@@ -1,31 +1,35 @@
-import { constants } from "./constants.js";
+import { CONSTANTS } from "./constants.js";
 
 export class SolidRectangle {
     constructor(x, y, width, height, style = {}) {
-        this.x = x;
-        this.y = y;
-        this.width = width;
-        this.height = height;
+        this.START_X = x;
+        this.START_Y = y;
+        this.END_X = x + width;
+        this.END_Y = y + height;
+        this.WIDTH = width;
+        this.HEIGHT = height;
         this.style = style;
     }
     collides(velocity, box) {
         // First, check if a collision occurs after moving.
-        const col = (this.x + velocity.x) < (box.x + box.width) &&
-                    (this.x + velocity.x + this.width) > box.x &&
-                    (this.y + velocity.y) < (box.y + box.height) &&
-                    (this.y + velocity.y + this.height) > box.y;
+        const col = this.START_X + velocity.x < box.END_X &&
+                    this.END_X + velocity.x > box.START_X &&
+                    this.START_Y + velocity.y < box.END_Y &&
+                    this.END_Y + velocity.y > box.START_Y;
         if (!col)
-            return constants.collision.NONE;
+            return CONSTANTS.COLLISION.NONE;
     
         let xEntry, yEntry;
     
         // Calculate the entry distance along the x-axis.
         if (velocity.x > 0) {
             // Moving right: distance from A's right edge to B's left edge.
-            xEntry = box.x - (this.x + this.width);
+            xEntry = box.START_X - this.END_X;
+            xEntry = Number(xEntry.toFixed(2));
         } else if (velocity.x < 0) {
             // Moving left: distance from A's left edge to B's right edge.
-            xEntry = (box.x + box.width) - this.x;
+            xEntry = box.END_X - this.START_X;
+            xEntry = Number(xEntry.toFixed(2));
         } else {
             xEntry = Number.POSITIVE_INFINITY;
         }
@@ -33,10 +37,14 @@ export class SolidRectangle {
         // Calculate the entry distance along the y-axis.
         if (velocity.y > 0) {
             // Moving down: distance from A's bottom to B's top.
-            yEntry = box.y - (this.y + this.height);
+            yEntry = box.START_Y - this.END_Y;
+            // 2 Decimals solves javascript fuckery in the 13th digit
+            yEntry = Number(yEntry.toFixed(2));
         } else if (velocity.y < 0) {
             // Moving up: distance from A's top to B's bottom.
-            yEntry = (box.y + box.height) - this.y;
+            yEntry = box.END_Y - this.START_Y;
+            // 2 Decimals solves javascript fuckery in the 13th digit
+            yEntry = Number(yEntry.toFixed(2));
         } else {
             yEntry = Number.POSITIVE_INFINITY;
         }
@@ -49,36 +57,39 @@ export class SolidRectangle {
         // so they don’t erroneously win the race.
         if (tEntryX < 0) tEntryX = Number.POSITIVE_INFINITY;
         if (tEntryY < 0) tEntryY = Number.POSITIVE_INFINITY;
-    
+
+        if (tEntryX === Number.POSITIVE_INFINITY && tEntryY === Number.POSITIVE_INFINITY)
+            return CONSTANTS.COLLISION.NONE;
+
         // Compare the times to determine which side of the immovable box is hit first.
         if (tEntryX < tEntryY) {
             // For horizontal collision: if moving right, A's right hits B's left.
-            return (velocity.x > 0) ? constants.collision.RIGHT : constants.collision.LEFT;
+            return (velocity.x > 0) ? CONSTANTS.COLLISION.RIGHT : CONSTANTS.COLLISION.LEFT;
         } else if (tEntryY < tEntryX) {
             // For vertical collision: if moving down, A's bottom hits B's top.
-            return (velocity.y > 0) ? constants.collision.BOTTOM : constants.collision.TOP;
+            return (velocity.y > 0) ? CONSTANTS.COLLISION.BOTTOM : CONSTANTS.COLLISION.TOP;
         } else {
             // Corner collision handling.
             if (velocity.x > 0 && velocity.y > 0) {
-                return constants.collision.CORNER_TOP_LEFT;
+                return CONSTANTS.COLLISION.CORNER_TOP_LEFT;
             } else if (velocity.x > 0 && velocity.y < 0) {
-                return constants.collision.CORNER_BOTTOM_LEFT;
+                return CONSTANTS.COLLISION.CORNER_BOTTOM_LEFT;
             } else if (velocity.x < 0 && velocity.y > 0) {
-                return constants.collision.CORNER_TOP_RIGHT;
+                return CONSTANTS.COLLISION.CORNER_TOP_RIGHT;
             } else if (velocity.x < 0 && velocity.y < 0) {
-                return constants.collision.CORNER_BOTTOM_RIGHT;
+                return CONSTANTS.COLLISION.CORNER_BOTTOM_RIGHT;
             } else {
-                return constants.collision.NONE;
+                return CONSTANTS.COLLISION.NONE;
             }
         }
     }
     draw(ctx) {
         ctx.fillStyle = this.style?.fillStyle ?? 'pink';
         ctx.fillRect(
-            this.x,
-            this.y,
-            this.width,
-            this.height
+            this.START_X,
+            this.START_Y,
+            this.WIDTH,
+            this.HEIGHT
         );
     }
 }
