@@ -1,9 +1,12 @@
+import { Animal } from "./Animal.js";
 export const CONSTANTS = Object.freeze({
   GAME_SETTINGS: {
-    FULL_STOP: 1,
-    GRAVITY: 1,
+    FULL_STOP: 2,
+    GRAVITY: 0.8,
     IDLE_COUNTER: 500,
-    DEBUG: false
+    DEBUG: true,
+    DASH_THRESHHOLD_MS: 80,
+    FRAMERATE: 1000 / 60,
   },
   GAME_STATES: {
     SELECTING: "selecting",
@@ -16,21 +19,34 @@ export const CONSTANTS = Object.freeze({
     PLAY: "play",
     PAT: "pat",
   },
-  AIRBORNE_STATES: {
+  CHARACTER_STATES: {
+    //IDLE STATES
+    IDLE: "idle",
+    SLEEPING: "sleeping",
+    RESTING: "resting",
+    SLEEPING: "sleeping",
+    EATING: "eating",
+    PLAYING: "playing",
+    HIDING: "hiding",
+    //MOVEMENT STATES
+    SLAMMING: "slamming",
+    GROUNDED: "grounded",
+    DROPPING: "dropping",
+    GRIPPING: "gripping",
+    CROUCHING: "crouching",
+    IMPULSING: "impulsing",
+    STANDING: "standing",
+    MOVING_LEFT: "moving_left",
+    MOVING_RIGHT: "moving_right",
+    WAITING_KEYPRESS_LEFT: "waiting_keypress_left",
+    WAITING_KEYPRESS_RIGHT: "waiting_keypress_right",
+    DASHING_LEFT: "dashing_left",
+    DASHING_RIGHT: "dashing_right",
+    //MODEL STATES
+    CROUCHED: "crouched",
     JUMPING: "jumping",
     DOUBLE_JUMPING: "double_jumping",
     FALLING: "falling",
-    SLAMMING: "slamming",
-    GROUNDED: "grounded"
-  },
-  ANIMAL_STATES: {
-    CROUCHING: "crouching",
-    RESTING: "resting",
-    EATING: "eating",
-    MOVING: "moving",
-    IDLE: "idle",
-    PLAYING: "playing",
-    HIDING: "hiding",
     CLIMBING: "climbing",
   },
   COLLISION: {
@@ -53,27 +69,7 @@ export const CONSTANTS = Object.freeze({
     RIGHT: "direction_right",
     NONE: "direction_none",
   },
-  ANIMAL_TYPES: {
-    NIT: {
-      maxVelocity: 10,
-      acceleration: 0.4,
-      type: "cat",
-      size: 50,
-      jumpingPower: 18,
-      name: "Nit",
-      color: "gray",
-    },
-    DIA: {
-      maxVelocity: 15,
-      acceleration: 0.5,
-      type: "cat",
-      size: 25,
-      jumpingPower: 22,
-      name: "Dia",
-      color: "white",
-    },
-  },
-  SCREEN: {
+  SCREEN_SETTINGS: {
     PADDING_LEFT: 5,
     PADDING_RIGHT: 5,
     PADDING_TOP: 5,
@@ -83,8 +79,21 @@ export const CONSTANTS = Object.freeze({
     ASPECT_RATIO: 16 / 9,
     MIN_HEIGHT: 360,
     MIN_WIDTH: 480,
-    FRAMERATE: 1000 / 24,
     WIDTH: 1920,
     HEIGHT: 1080,
   },
+  ANIMAL_TYPES:{
+    CAT:"cat",
+    DOG:"dog",
+    SHEEP:"sheep",
+    BEAR: "bear",
+    RACOON: "racoon",
+    RABBIT: "rabbit",
+    KANGAROO: "kangaroo",
+    SNAKE: "snake",
+  }
+});
+export const ANIMALS = Object.freeze({
+  NIT: new Animal("Nit", CONSTANTS.ANIMAL_TYPES.CAT, "gray", 8, 0.4, 50, 14, 20),
+  DIA: new Animal("Dia", CONSTANTS.ANIMAL_TYPES.CAT, "white", 12, 0.6, 25, 22, 30),
 });

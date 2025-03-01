@@ -1,26 +1,18 @@
-import { CONSTANTS } from "./constants.js";
+import { CollisionBox } from "./CollisionBox.js";
+import { CONSTANTS } from "./CONSTANTS.js";
 
-export class SolidRectangle {
+export class SolidRectangle extends CollisionBox {
     constructor(x, y, width, height, style = {}) {
-        this.START_X = x;
-        this.START_Y = y;
-        this.END_X = x + width;
-        this.END_Y = y + height;
-        this.WIDTH = width;
-        this.HEIGHT = height;
+        super(x, y, width, height);
         this.style = style;
     }
-    collides(velocity, box) {
+    contains(velocity, box) {
         // First, check if a collision occurs after moving.
-        const col = this.START_X + velocity.x < box.END_X &&
-                    this.END_X + velocity.x > box.START_X &&
-                    this.START_Y + velocity.y < box.END_Y &&
-                    this.END_Y + velocity.y > box.START_Y;
-        if (!col)
+        if (!super.contains(box, velocity))
             return CONSTANTS.COLLISION.NONE;
-    
+
         let xEntry, yEntry;
-    
+
         // Calculate the entry distance along the x-axis.
         if (velocity.x > 0) {
             // Moving right: distance from A's right edge to B's left edge.
@@ -33,7 +25,7 @@ export class SolidRectangle {
         } else {
             xEntry = Number.POSITIVE_INFINITY;
         }
-    
+
         // Calculate the entry distance along the y-axis.
         if (velocity.y > 0) {
             // Moving down: distance from A's bottom to B's top.
@@ -48,11 +40,11 @@ export class SolidRectangle {
         } else {
             yEntry = Number.POSITIVE_INFINITY;
         }
-    
+
         // Compute the time to collision on each axis.
         let tEntryX = (velocity.x !== 0) ? (xEntry / velocity.x) : Number.POSITIVE_INFINITY;
         let tEntryY = (velocity.y !== 0) ? (yEntry / velocity.y) : Number.POSITIVE_INFINITY;
-    
+
         // Clamp negative entry times (which indicate an existing overlap) to Infinity,
         // so they don’t erroneously win the race.
         if (tEntryX < 0) tEntryX = Number.POSITIVE_INFINITY;

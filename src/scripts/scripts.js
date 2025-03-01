@@ -1,7 +1,7 @@
 ﻿﻿import { Game } from "./Game.js"
-import { CONSTANTS } from "./constants.js";
+import { ANIMALS } from "./CONSTANTS.js";
 
 window.addEventListener('load', () => {
-  const game = new Game('gameCanvas', CONSTANTS.ANIMAL_TYPES.NIT);
+  const game = new Game('gameCanvas', ANIMALS.NIT);
   game.start();
 });
