@@ -6,7 +6,7 @@ import { SolidRectangle } from "./SolidRectangle.js";
 
 export class Game {
   #lastTime = 0;
-  constructor(canvasId, animal=new Animal()) {
+  constructor(canvasId, animal = new Animal()) {
     this.canvas = document.getElementById(canvasId);
     this.ctx = this.canvas.getContext("2d");
     this.keysPressed = {};
@@ -25,8 +25,11 @@ export class Game {
       this.boundaries.HEIGHT - animal.SIZE * this.SIZE_RATIO,
       this.boundaries
     );
+    // New accumulator for the fixed timestep
+    this.accumulator = 0;
     this.gameLoop = this.gameLoop.bind(this);
   }
+  
   bindKeys() {
     document.addEventListener("keydown", (event) => {
       if (event.code === "ArrowLeft") {
@@ -58,10 +61,12 @@ export class Game {
       }
     });
   }
+  
   new() {
     this.score = 0;
     this.gameState = GAME.STATES.SELECTING;
   }
+  
   update() {
     this.character.update(this.#getNearbyTerrain());
   }
@@ -83,18 +88,26 @@ export class Game {
   }
 
   gameLoop(time) {
-    const delta = time - this.#lastTime;
-    if (delta > GAME.SCREEN.FRAMERATE) {
-      this.#lastTime = time - (delta % GAME.SCREEN.FRAMERATE);
-      this.update();
-      this.draw();
+    const fixedDelta = GAME.SYSTEM.DELTA_TIME_MS;
+    if (this.#lastTime === 0) {
+      this.#lastTime = time;
     }
+    let deltaTime = time - this.#lastTime;
+    this.#lastTime = time;
+    this.accumulator += deltaTime;
+    
+    while (this.accumulator >= fixedDelta) {
+      this.update();
+      this.accumulator -= fixedDelta;
+    }
+    
+    this.draw();
     requestAnimationFrame(this.gameLoop);
   }
 
   start() {
     this.gameState = GAME.STATES.PLAYING;
-    this.gameLoop();
+    requestAnimationFrame(this.gameLoop);
   }
 
   #createTerrain() {
@@ -234,6 +247,7 @@ export class Game {
       }
     }
   }
+  
   #showGrid() {
     const sectionWidth = this.boundaries.WIDTH / 16;
     const sectionHeight = this.boundaries.HEIGHT / 9;
@@ -267,6 +281,7 @@ export class Game {
       firstLine = false;
     }
   }
+  
   #getNearbyTerrain() {
     const SECTION_WIDTH = this.boundaries.WIDTH / 16;
     const SECTION_HEIGHT = this.boundaries.HEIGHT / 9;

@@ -41,8 +41,8 @@ export class Character {
   }
   update(terrain = new Set()) {
     this.#computeMovement();
-    this.#stayInBoundaries();
     this.#resolveCollisions(terrain);
+    this.#stayInBoundaries();
     this.#updateIdleAnimation();
   }
   draw(ctx) {
@@ -109,6 +109,8 @@ export class Character {
   }
   keydownLeft() {
     this.#states__not_idle();
+    if(this.states.has(CONSTANTS.CHARACTER_STATES.GRIPPING_LEFT))
+      return;
     this.states.add(CONSTANTS.CHARACTER_STATES.MOVING_LEFT);
     this.states.delete(CONSTANTS.CHARACTER_STATES.MOVING_RIGHT);
     this.states.delete(CONSTANTS.CHARACTER_STATES.GRIPPING_RIGHT);
@@ -119,6 +121,8 @@ export class Character {
   }
   keydownRight() {
     this.#states__not_idle();
+    if(this.states.has(CONSTANTS.CHARACTER_STATES.GRIPPING_RIGHT))
+      return;
     this.states.add(CONSTANTS.CHARACTER_STATES.MOVING_RIGHT);
     this.states.delete(CONSTANTS.CHARACTER_STATES.MOVING_LEFT);
     this.states.delete(CONSTANTS.CHARACTER_STATES.GRIPPING_LEFT);
@@ -131,13 +135,13 @@ export class Character {
     this.states.add(CONSTANTS.CHARACTER_STATES.WAITING_KEYPRESS_LEFT);
     setTimeout(() => {
       this.states.delete(CONSTANTS.CHARACTER_STATES.WAITING_KEYPRESS_LEFT);
-    }, GAME.SETTINGS.DASH_THRESHHOLD_MS);
+    }, GAME.PARAMETERS.DASH_THRESHHOLD_MS);
   }
   keyupRight() {
     this.states.add(CONSTANTS.CHARACTER_STATES.WAITING_KEYPRESS_RIGHT);
     setTimeout(() => {
       this.states.delete(CONSTANTS.CHARACTER_STATES.WAITING_KEYPRESS_RIGHT);
-    }, GAME.SETTINGS.DASH_THRESHHOLD_MS);
+    }, GAME.PARAMETERS.DASH_THRESHHOLD_MS);
   }
   noKey() {
     this.states.delete(CONSTANTS.CHARACTER_STATES.MOVING_RIGHT);
@@ -156,22 +160,22 @@ export class Character {
     else if (this.states.has(CONSTANTS.CHARACTER_STATES.DASHING_LEFT)) {
       this.velocity.x = -this.DASHING_DISTANCE;
       this.states.delete(CONSTANTS.CHARACTER_STATES.DASHING_LEFT);
-      this.states.add(CONSTANTS.CHARACTER_STATES.MOVING_LEFT);
+      // this.states.add(CONSTANTS.CHARACTER_STATES.MOVING_LEFT);
     }
     else if (this.states.has(CONSTANTS.CHARACTER_STATES.DASHING_RIGHT)) {
       this.velocity.x = this.DASHING_DISTANCE;
       this.states.delete(CONSTANTS.CHARACTER_STATES.DASHING_RIGHT);
-      this.states.add(CONSTANTS.CHARACTER_STATES.MOVING_RIGHT);
+      // this.states.add(CONSTANTS.CHARACTER_STATES.MOVING_RIGHT);
     }
     else if (this.states.has(CONSTANTS.CHARACTER_STATES.MOVING_LEFT)) {
       if (this.velocity.x < -this.MAX_VELOCITY) {
         // DASHES
-        this.velocity.x += this.ACCELERATION * GAME.SETTINGS.FULL_STOP;
+        this.velocity.x += this.ACCELERATION * GAME.PARAMETERS.FULL_STOP;
         this.velocity.x = Math.min(this.velocity.x, -this.ACCELERATION);
       } else {
         this.velocity.x =
           this.velocity.x > 0
-            ? this.velocity.x - this.ACCELERATION * GAME.SETTINGS.FULL_STOP
+            ? this.velocity.x - this.ACCELERATION * GAME.PARAMETERS.FULL_STOP
             : this.velocity.x - this.ACCELERATION;
         this.velocity.x = Math.max(this.velocity.x, -this.MAX_VELOCITY);
       }
@@ -179,12 +183,12 @@ export class Character {
     else if (this.states.has(CONSTANTS.CHARACTER_STATES.MOVING_RIGHT)) {
       if (this.velocity.x > this.MAX_VELOCITY) {
         // DASHES
-        this.velocity.x -= this.ACCELERATION * GAME.SETTINGS.FULL_STOP;
+        this.velocity.x -= this.ACCELERATION * GAME.PARAMETERS.FULL_STOP;
         this.velocity.x = Math.max(this.velocity.x, this.ACCELERATION);
       } else {
         this.velocity.x =
           this.velocity.x < 0
-            ? this.velocity.x + this.ACCELERATION * GAME.SETTINGS.FULL_STOP
+            ? this.velocity.x + this.ACCELERATION * GAME.PARAMETERS.FULL_STOP
             : this.velocity.x + this.ACCELERATION;
         this.velocity.x = Math.min(this.velocity.x, this.MAX_VELOCITY);
       }
@@ -196,10 +200,10 @@ export class Character {
           this.velocity.x == 0
             ? 0
             : this.velocity.x < 0
-              ? this.velocity.x + this.ACCELERATION * GAME.SETTINGS.FULL_STOP
-              : this.velocity.x - this.ACCELERATION * GAME.SETTINGS.FULL_STOP;
+              ? this.velocity.x + this.ACCELERATION * GAME.PARAMETERS.FULL_STOP
+              : this.velocity.x - this.ACCELERATION * GAME.PARAMETERS.FULL_STOP;
         this.velocity.x =
-          Math.abs(this.velocity.x) < this.ACCELERATION * GAME.SETTINGS.FULL_STOP
+          Math.abs(this.velocity.x) < this.ACCELERATION * GAME.PARAMETERS.FULL_STOP
             ? 0
             : this.velocity.x;
       }
@@ -218,7 +222,7 @@ export class Character {
     }
     else {
       // GRAVITY
-      this.velocity.y -= GAME.SETTINGS.GRAVITY * this.RESIZE_RATIO;
+      this.velocity.y -= GAME.PARAMETERS.GRAVITY * this.RESIZE_RATIO;
     }
   }
   #stayInBoundaries() {
@@ -367,7 +371,7 @@ export class Character {
         this.#states__idle();
         clearTimeout(this.idle_timeout);
         this.idle_timeout = null;
-      }, GAME.SETTINGS.IDLE_TIMER_MS);
+      }, GAME.PARAMETERS.IDLE_TIMER_MS);
     }
   }
   get is_airborne() {
@@ -449,7 +453,7 @@ export class Character {
           }
           clearTimeout(this.gripping_timeout);
           this.gripping_timeout = null;
-        }, GAME.SETTINGS.GRIPPING_TIMER_MS);
+        }, GAME.PARAMETERS.GRIPPING_TIMER_MS);
       }
     }
   }
@@ -467,7 +471,7 @@ export class Character {
           }
           clearTimeout(this.gripping_timeout);
           this.gripping_timeout = null;
-        }, GAME.SETTINGS.GRIPPING_TIMER_MS);
+        }, GAME.PARAMETERS.GRIPPING_TIMER_MS);
       }
     }
   }

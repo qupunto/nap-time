@@ -2,8 +2,10 @@ import { Animal } from "./Animal.js";
 export const GAME  = Object.freeze({
   SYSTEM: {
     DEBUG: true,
+    DELTA_TIME_MS: 10,
+    VELOCITY_THRESHOLD_PX: 5,
   },
-  SETTINGS: {
+  PARAMETERS: {
     FULL_STOP: 2,
     GRAVITY: 1,
     IDLE_TIMER_MS: 10000,
@@ -21,8 +23,7 @@ export const GAME  = Object.freeze({
     MIN_HEIGHT: 360,
     MIN_WIDTH: 480,
     WIDTH: 1920,
-    HEIGHT: 1080,
-    FRAMERATE: 1,
+    HEIGHT: 1080
   },
   STATES: {
     SELECTING: "selecting",
@@ -103,6 +104,6 @@ export const CONSTANTS = Object.freeze({
   }
 });
 export const ANIMALS = Object.freeze({
-  NIT: new Animal("Nit", CONSTANTS.ANIMAL_TYPES.CAT, "gray", 10, 0.5, 40, 15, 20),
+  NIT: new Animal("Nit", CONSTANTS.ANIMAL_TYPES.CAT, "gray", 10, 0.5, 40, 18, 20),
   DIA: new Animal("Dia", CONSTANTS.ANIMAL_TYPES.CAT, "white", 12, 0.6, 25, 22, 30),
 });
