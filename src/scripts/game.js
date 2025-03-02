@@ -1,6 +1,6 @@
 ﻿import { Character } from "./Character.js";
 import { Animal } from "./Animal.js";
-import { CONSTANTS } from "./CONSTANTS.js";
+import { GAME } from "./constants.js";
 import { ScreenSection } from "./ScreenSection.js";
 import { SolidRectangle } from "./SolidRectangle.js";
 
@@ -21,8 +21,8 @@ export class Game {
     this.drops = [];
     this.character = new Character(
       animal,
-      this.boundaries.WIDTH / 2 - animal.WIDTH * this.SIZE_RATIO,
-      this.boundaries.HEIGHT - animal.HEIGHT * this.SIZE_RATIO,
+      this.boundaries.START_X + this.boundaries.WIDTH / 2 - animal.SIZE * this.SIZE_RATIO,
+      this.boundaries.HEIGHT - animal.SIZE * this.SIZE_RATIO,
       this.boundaries
     );
     this.gameLoop = this.gameLoop.bind(this);
@@ -60,32 +60,32 @@ export class Game {
   }
   new() {
     this.score = 0;
-    this.gameState = CONSTANTS.GAME_STATES.SELECTING;
+    this.gameState = GAME.STATES.SELECTING;
   }
   update() {
     this.character.update(this.#getNearbyTerrain());
   }
 
   draw() {
-    // this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     this.boundaries.draw(this.ctx);
     this.backgroundTerrain.forEach((element) => {
       element.draw(this.ctx);
     });
     // this.drops.forEach((element) => {
-
+    //   element.draw(this.ctx);
     // });
     this.character.draw(this.ctx);
-    this.foregroundTerrain.forEach((element) => {
-      element.draw(this.ctx);
-    });
-    if (CONSTANTS.GAME_SETTINGS.DEBUG) this.#showGrid();
+    // this.foregroundTerrain.forEach((element) => {
+    //   element.draw(this.ctx);
+    // });
+    if (GAME.SYSTEM.DEBUG) this.#showGrid();
   }
 
   gameLoop(time) {
     const delta = time - this.#lastTime;
-    if (delta > CONSTANTS.GAME_SETTINGS.FRAMERATE) {
-      this.#lastTime = time - (delta % CONSTANTS.GAME_SETTINGS.FRAMERATE);
+    if (delta > GAME.SCREEN.FRAMERATE) {
+      this.#lastTime = time - (delta % GAME.SCREEN.FRAMERATE);
       this.update();
       this.draw();
     }
@@ -93,7 +93,7 @@ export class Game {
   }
 
   start() {
-    this.gameState = CONSTANTS.GAME_STATES.PLAYING;
+    this.gameState = GAME.STATES.PLAYING;
     this.gameLoop();
   }
 
@@ -106,7 +106,7 @@ export class Game {
         400 * this.SIZE_RATIO,
         200 * this.SIZE_RATIO,
         {
-          fillStyle: "blue",
+          fillStyle: "darkgrey",
         }
       )
     );
@@ -143,58 +143,75 @@ export class Game {
         }
       )
     );
-    this.backgroundTerrain.forEach((element) => {
-      element.draw(this.ctx);
-    });
+    this.backgroundTerrain.push(
+      new SolidRectangle(
+        this.boundaries.END_X -10 * this.SIZE_RATIO,
+        this.boundaries.START_Y + 100 * this.SIZE_RATIO,
+        10*this.SIZE_RATIO,
+        this.boundaries.HEIGHT - 100 * this.SIZE_RATIO,
+        {
+          fillStyle: "brown",
+        }
+      )
+    );
+    this.backgroundTerrain.push(
+      new SolidRectangle(
+        this.boundaries.START_X,
+        this.boundaries.START_Y + 100 * this.SIZE_RATIO,
+        10*this.SIZE_RATIO,
+        this.boundaries.HEIGHT - 100 * this.SIZE_RATIO,
+        {
+          fillStyle: "brown",
+        }
+      )
+    );
   }
 
   #createCanvas() {
     this.canvas.height = Math.max(
       window.innerHeight,
-      CONSTANTS.SCREEN_SETTINGS.MIN_HEIGHT
+      GAME.SCREEN.MIN_HEIGHT
     );
-    this.canvas.width = Math.max(window.innerWidth, CONSTANTS.SCREEN_SETTINGS.MIN_WIDTH);
+    this.canvas.width = Math.max(window.innerWidth, GAME.SCREEN.MIN_WIDTH);
 
     const availableWidth =
       this.canvas.width -
-      (CONSTANTS.SCREEN_SETTINGS.PADDING_LEFT + CONSTANTS.SCREEN_SETTINGS.PADDING_RIGHT);
+      (GAME.SCREEN.PADDING_LEFT + GAME.SCREEN.PADDING_RIGHT);
     const availableHeight =
       this.canvas.height -
-      (CONSTANTS.SCREEN_SETTINGS.PADDING_TOP + CONSTANTS.SCREEN_SETTINGS.PADDING_BOTTOM);
+      (GAME.SCREEN.PADDING_TOP + GAME.SCREEN.PADDING_BOTTOM);
 
     let rectWidth,
       rectHeight,
       widthClosest = true;
 
-    if (availableWidth / availableHeight < CONSTANTS.SCREEN_SETTINGS.ASPECT_RATIO) {
+    if (availableWidth / availableHeight < GAME.SCREEN.ASPECT_RATIO) {
       rectWidth = availableWidth;
-      rectHeight = Math.round(availableWidth / CONSTANTS.SCREEN_SETTINGS.ASPECT_RATIO);
+      rectHeight = Math.round(availableWidth / GAME.SCREEN.ASPECT_RATIO);
     } else {
       widthClosest = false;
       rectHeight = availableHeight;
-      rectWidth = Math.round(availableHeight * CONSTANTS.SCREEN_SETTINGS.ASPECT_RATIO);
+      rectWidth = Math.round(availableHeight * GAME.SCREEN.ASPECT_RATIO);
     }
 
     const offsetX = widthClosest
-      ? CONSTANTS.SCREEN_SETTINGS.PADDING_LEFT
+      ? GAME.SCREEN.PADDING_LEFT
       : (this.canvas.width - rectWidth) / 2;
     const offsetY = !widthClosest
-      ? CONSTANTS.SCREEN_SETTINGS.PADDING_TOP
+      ? GAME.SCREEN.PADDING_TOP
       : (this.canvas.height - rectHeight) / 2;
 
-    this.ctx.fillStyle = CONSTANTS.SCREEN_SETTINGS.OUTSIDE_COLOR;
+    this.ctx.fillStyle = GAME.SCREEN.OUTSIDE_COLOR;
     this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
-    this.ctx.fillStyle = CONSTANTS.SCREEN_SETTINGS.BACKGROUND_COLOR;
-    this.ctx.fillRect(offsetX, offsetY, rectWidth, rectHeight);
     this.boundaries = new SolidRectangle(
       offsetX,
       offsetY,
       rectWidth,
       rectHeight,
-      { fillStyle: CONSTANTS.SCREEN_SETTINGS.BACKGROUND_COLOR }
+      { fillStyle: GAME.SCREEN.BACKGROUND_COLOR }
     );
-    this.SIZE_RATIO = this.boundaries.WIDTH / CONSTANTS.SCREEN_SETTINGS.WIDTH;
+    this.SIZE_RATIO = this.boundaries.WIDTH / GAME.SCREEN.WIDTH;
   }
 
   #assignScreenSections() {
@@ -228,20 +245,20 @@ export class Game {
     let firstLine = true;
     let n = 0;
     for (let x = 0; x < 16; x++) {
-      this.ctx.font = '10px arial';
+      this.ctx.font = '14px arial';
       this.ctx.beginPath();
       this.ctx.moveTo(this.boundaries.START_X + x * sectionWidth, this.boundaries.START_Y);
       this.ctx.lineTo(this.boundaries.START_X + x * sectionWidth, this.boundaries.END_Y);
       this.ctx.stroke();
-      this.ctx.fillText(Math.trunc(x * sectionWidth) + "px", this.boundaries.START_X + x * sectionWidth + 5, this.boundaries.START_Y + 10);
+      this.ctx.fillText(Math.trunc(x * sectionWidth) + "px", this.boundaries.START_X + x * sectionWidth + 5, this.boundaries.START_Y + 15);
       for (let y = 0; y < 9; y++) {
         if (firstLine) {
-          this.ctx.font = '10px arial';
+          this.ctx.font = '14px arial';
           this.ctx.beginPath();
           this.ctx.moveTo(this.boundaries.START_X, this.boundaries.START_Y + y * sectionHeight);
           this.ctx.lineTo(this.boundaries.END_X, this.boundaries.START_Y + y * sectionHeight);
           this.ctx.stroke();
-          this.ctx.fillText(Math.trunc(y * sectionHeight) + "px", this.boundaries.START_X + 5, this.boundaries.START_Y + y * sectionHeight - 5);
+          this.ctx.fillText(Math.trunc(y * sectionHeight) + "px", this.boundaries.START_X + 5, this.boundaries.START_Y + y * sectionHeight + 15);
         }
         this.ctx.font = '20px arial';
         this.ctx.fillText(n, this.boundaries.START_X + x * sectionWidth + sectionWidth / 2 - 10, this.boundaries.START_Y + y * sectionHeight + sectionHeight / 2 + 10);

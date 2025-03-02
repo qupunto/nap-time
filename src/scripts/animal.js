@@ -1,4 +1,4 @@
-import { CONSTANTS } from "./CONSTANTS.js";
+import { CONSTANTS } from "./constants.js";
 export class Animal {
     constructor(name = "chi", type = CONSTANTS.ANIMAL_TYPES.CAT, color = "gray", maxVelocity = 10, acceleration = 0.5, size = 30, jumpingPower = 18, dashingDistance = 25) {
         this.NAME = name;
@@ -9,7 +9,5 @@ export class Animal {
         this.SIZE = size;
         this.JUMPING_POWER = jumpingPower;
         this.DASHING_DISTANCE = dashingDistance;
-        this.WIDTH = size;
-        this.HEIGHT = size;
     }
 }

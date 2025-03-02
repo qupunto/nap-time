@@ -1,5 +1,5 @@
 import { CollisionBox } from "./CollisionBox.js";
-import { CONSTANTS } from "./CONSTANTS.js";
+import { CONSTANTS } from "./constants.js";
 
 export class SolidRectangle extends CollisionBox {
     constructor(x, y, width, height, style = {}) {

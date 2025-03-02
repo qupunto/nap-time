@@ -1,24 +1,42 @@
 import { Animal } from "./Animal.js";
-export const CONSTANTS = Object.freeze({
-  GAME_SETTINGS: {
-    FULL_STOP: 2,
-    GRAVITY: 0.8,
-    IDLE_COUNTER: 500,
+export const GAME  = Object.freeze({
+  SYSTEM: {
     DEBUG: true,
-    DASH_THRESHHOLD_MS: 80,
-    FRAMERATE: 1000 / 60,
   },
-  GAME_STATES: {
+  SETTINGS: {
+    FULL_STOP: 2,
+    GRAVITY: 1,
+    IDLE_TIMER_MS: 10000,
+    DASH_THRESHHOLD_MS: 80,
+    GRIPPING_TIMER_MS: 2000
+  }, 
+  SCREEN: {
+    PADDING_LEFT: 5,
+    PADDING_RIGHT: 5,
+    PADDING_TOP: 5,
+    PADDING_BOTTOM: 20,
+    BACKGROUND_COLOR: "black",
+    OUTSIDE_COLOR: "green",
+    ASPECT_RATIO: 16 / 9,
+    MIN_HEIGHT: 360,
+    MIN_WIDTH: 480,
+    WIDTH: 1920,
+    HEIGHT: 1080,
+    FRAMERATE: 1,
+  },
+  STATES: {
     SELECTING: "selecting",
     PLAYING: "playing",
     PAUSED: "paused",
     OVER: "over",
   },
-  GAME_TYPES: {
+  TYPES: {
     FEED: "feed",
     PLAY: "play",
     PAT: "pat",
   },
+});
+export const CONSTANTS = Object.freeze({
   CHARACTER_STATES: {
     //IDLE STATES
     IDLE: "idle",
@@ -29,25 +47,29 @@ export const CONSTANTS = Object.freeze({
     PLAYING: "playing",
     HIDING: "hiding",
     //MOVEMENT STATES
-    SLAMMING: "slamming",
     GROUNDED: "grounded",
-    DROPPING: "dropping",
-    GRIPPING: "gripping",
-    CROUCHING: "crouching",
-    IMPULSING: "impulsing",
-    STANDING: "standing",
+    GRIPPED: "gripped",
+    GRIPPING_LEFT: "gripping_left",
+    GRIPPING_RIGHT: "gripping_right",
     MOVING_LEFT: "moving_left",
     MOVING_RIGHT: "moving_right",
-    WAITING_KEYPRESS_LEFT: "waiting_keypress_left",
-    WAITING_KEYPRESS_RIGHT: "waiting_keypress_right",
-    DASHING_LEFT: "dashing_left",
-    DASHING_RIGHT: "dashing_right",
-    //MODEL STATES
     CROUCHED: "crouched",
     JUMPING: "jumping",
     DOUBLE_JUMPING: "double_jumping",
     FALLING: "falling",
     CLIMBING: "climbing",
+    //TRIGGER STATES
+    SLAMMING: "slamming",
+    DROPPING: "dropping",
+    CROUCHING: "crouching",
+    IMPULSING_UP: "impulsing_up",
+    IMPULSING_RIGHT: "impulsing_right",
+    IMPULSING_LEFT: "impulsing_left",
+    STANDING: "standing",
+    WAITING_KEYPRESS_LEFT: "waiting_keypress_left",
+    WAITING_KEYPRESS_RIGHT: "waiting_keypress_right",
+    DASHING_LEFT: "dashing_left",
+    DASHING_RIGHT: "dashing_right",
   },
   COLLISION: {
     TOP: "collision_top",
@@ -69,19 +91,6 @@ export const CONSTANTS = Object.freeze({
     RIGHT: "direction_right",
     NONE: "direction_none",
   },
-  SCREEN_SETTINGS: {
-    PADDING_LEFT: 5,
-    PADDING_RIGHT: 5,
-    PADDING_TOP: 5,
-    PADDING_BOTTOM: 20,
-    BACKGROUND_COLOR: "black",
-    OUTSIDE_COLOR: "green",
-    ASPECT_RATIO: 16 / 9,
-    MIN_HEIGHT: 360,
-    MIN_WIDTH: 480,
-    WIDTH: 1920,
-    HEIGHT: 1080,
-  },
   ANIMAL_TYPES:{
     CAT:"cat",
     DOG:"dog",
@@ -94,6 +103,6 @@ export const CONSTANTS = Object.freeze({
   }
 });
 export const ANIMALS = Object.freeze({
-  NIT: new Animal("Nit", CONSTANTS.ANIMAL_TYPES.CAT, "gray", 8, 0.4, 50, 14, 20),
+  NIT: new Animal("Nit", CONSTANTS.ANIMAL_TYPES.CAT, "gray", 10, 0.5, 40, 15, 20),
   DIA: new Animal("Dia", CONSTANTS.ANIMAL_TYPES.CAT, "white", 12, 0.6, 25, 22, 30),
 });
