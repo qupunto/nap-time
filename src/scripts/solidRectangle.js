@@ -10,14 +10,21 @@ export class SolidRectangle extends CollisionBox {
   // Modified collision detection with swept AABB to handle tunneling.
   // "velocity" is the displacement vector for the moving object (this),
   // and "box" is the static object.
-  contains(velocity, box) {
+  contains(box,v={x:0,y:0}){
+    return super.contains(box,v);
+  }
+  collides(box, v={x:0,y:0}) {
+    v = super.collides(box, v);
+    if(v === null)
+        return CONSTANTS.COLLISION.NONE;
+
     let xEntry, xExit, yEntry, yExit;
     
     // Calculate entry and exit distances along the x-axis.
-    if (velocity.x > 0) {
+    if (v.x > 0) {
       xEntry = box.START_X - this.END_X;
       xExit  = box.END_X - this.START_X;
-    } else if (velocity.x < 0) {
+    } else if (v.x < 0) {
       xEntry = box.END_X - this.START_X;
       xExit  = box.START_X - this.END_X;
     } else {
@@ -27,10 +34,10 @@ export class SolidRectangle extends CollisionBox {
     }
     
     // Calculate entry and exit distances along the y-axis.
-    if (velocity.y > 0) {
+    if (v.y > 0) {
       yEntry = box.START_Y - this.END_Y;
       yExit  = box.END_Y - this.START_Y;
-    } else if (velocity.y < 0) {
+    } else if (v.y < 0) {
       yEntry = box.END_Y - this.START_Y;
       yExit  = box.START_Y - this.END_Y;
     } else {
@@ -40,10 +47,10 @@ export class SolidRectangle extends CollisionBox {
     }
     
     // Compute the times at which the collision enters and exits for each axis.
-    let tEntryX = (velocity.x !== 0) ? (xEntry / velocity.x) : -Infinity;
-    let tEntryY = (velocity.y !== 0) ? (yEntry / velocity.y) : -Infinity;
-    let tExitX  = (velocity.x !== 0) ? (xExit  / velocity.x) : Infinity;
-    let tExitY  = (velocity.y !== 0) ? (yExit  / velocity.y) : Infinity;
+    let tEntryX = (v.x !== 0) ? (xEntry / v.x) : -Infinity;
+    let tEntryY = (v.y !== 0) ? (yEntry / v.y) : -Infinity;
+    let tExitX  = (v.x !== 0) ? (xExit  / v.x) : Infinity;
+    let tExitY  = (v.y !== 0) ? (yExit  / v.y) : Infinity;
     
     // The overall times of collision entry and exit.
     let tEntry = Math.max(tEntryX, tEntryY);
@@ -59,18 +66,18 @@ export class SolidRectangle extends CollisionBox {
     
     // Determine which axis collides last; that side is where the collision occurs.
     if (tEntryX > tEntryY) {
-      return (velocity.x > 0) ? CONSTANTS.COLLISION.RIGHT : CONSTANTS.COLLISION.LEFT;
+      return (v.x > 0) ? CONSTANTS.COLLISION.RIGHT : CONSTANTS.COLLISION.LEFT;
     } else if (tEntryY > tEntryX) {
-      return (velocity.y > 0) ? CONSTANTS.COLLISION.BOTTOM : CONSTANTS.COLLISION.TOP;
+      return (v.y > 0) ? CONSTANTS.COLLISION.BOTTOM : CONSTANTS.COLLISION.TOP;
     } else {
       // If both times are equal, handle as a corner collision.
-      if (velocity.x > 0 && velocity.y > 0) {
+      if (v.x > 0 && v.y > 0) {
         return CONSTANTS.COLLISION.CORNER_TOP_LEFT;
-      } else if (velocity.x > 0 && velocity.y < 0) {
+      } else if (v.x > 0 && v.y < 0) {
         return CONSTANTS.COLLISION.CORNER_BOTTOM_LEFT;
-      } else if (velocity.x < 0 && velocity.y > 0) {
+      } else if (v.x < 0 && v.y > 0) {
         return CONSTANTS.COLLISION.CORNER_TOP_RIGHT;
-      } else if (velocity.x < 0 && velocity.y < 0) {
+      } else if (v.x < 0 && v.y < 0) {
         return CONSTANTS.COLLISION.CORNER_BOTTOM_RIGHT;
       } else {
         return CONSTANTS.COLLISION.NONE;

@@ -3,13 +3,13 @@ export const GAME  = Object.freeze({
   SYSTEM: {
     DEBUG: true,
     DELTA_TIME_MS: 10,
-    VELOCITY_THRESHOLD_PX: 5,
+    VELOCITY_STEPS_PX: 5,
   },
   PARAMETERS: {
     FULL_STOP: 2,
     GRAVITY: 1,
     IDLE_TIMER_MS: 10000,
-    DASH_THRESHHOLD_MS: 80,
+    DASH_THRESHHOLD_MS: 200,
     GRIPPING_TIMER_MS: 2000
   }, 
   SCREEN: {

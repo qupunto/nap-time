@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Intersection Solver</title>
+  <script src="src/scripts/nerdamer/all.min.js"></script>
+</head>
+<body>
+  <script>
+    // Define coefficients for the parabola y = ax^2 + bx + c and the line y = mx + d
+    const a = 1, b = 0, c = 0; // Parabola: y = x^2
+    const m = 2, d = 3;        // Line: y = 2x + 3
+
+    // Set up the equation: ax^2 + bx + c = mx + d => ax^2 + bx + c - (mx + d) = 0
+    const eq = nerdamer(`(${a}*x^2 + ${b}*x + ${c}) - (${m}*x + ${d})`);
+
+    // Solve the equation for x
+    const solutions = nerdamer.solve(eq, 'x');
+
+    console.log('Intersection x-values:', eq.toString());
+    
+    // To get the corresponding y-values, substitute back into the line equation
+    // const intersections = solutions.map(sol => {
+    //   const y = nerdamer(`${m}*(${sol}) + ${d}`).evaluate().text();
+    //   return { x: sol, y };
+    // });
+
+    console.log('Solutions:', solutions.toString());
+  </script>
+</body>
+</html>

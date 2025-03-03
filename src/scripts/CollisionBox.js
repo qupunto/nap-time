@@ -1,3 +1,5 @@
+import { GAME } from "./constants.js";
+
 export class CollisionBox {
   constructor(x, y, width, height) {
     this.START_X = x;
@@ -7,24 +9,23 @@ export class CollisionBox {
     this.WIDTH = width;
     this.HEIGHT = height;
   }
-  
+
   contains(box, v = { x: 0, y: 0 }) {
     return this.START_X + v.x < box.END_X &&
-           this.END_X + v.x > box.START_X &&
-           this.START_Y + v.y < box.END_Y &&
-           this.END_Y + v.y > box.START_Y;
+      this.END_X + v.x > box.START_X &&
+      this.START_Y + v.y < box.END_Y &&
+      this.END_Y + v.y > box.START_Y;
   }
-  
-  // Continuous collision detection: checks the swept bounding box over the trajectory.
+
   collides(box, v = { x: 0, y: 0 }) {
-    const sweptStartX = Math.min(this.START_X, this.START_X + v.x);
-    const sweptEndX = Math.max(this.END_X, this.END_X + v.x);
-    const sweptStartY = Math.min(this.START_Y, this.START_Y + v.y);
-    const sweptEndY = Math.max(this.END_Y, this.END_Y + v.y);
-    
-    return sweptStartX < box.END_X &&
-           sweptEndX > box.START_X &&
-           sweptStartY < box.END_Y &&
-           sweptEndY > box.START_Y;
+    const n = Math.abs(v.x) > Math.abs(v.y) ? Math.abs(Math.trunc(v.x / GAME.SYSTEM.VELOCITY_STEPS_PX))+1 : Math.abs(Math.trunc(v.y / GAME.SYSTEM.VELOCITY_STEPS_PX))+1;
+    const stepX = v.x / n;
+    const stepY = v.y / n;
+    for (let i = 1; i <= n; i++) {
+      const stepV = { x: stepX * i, y: stepY * i }
+      if (this.contains(box, stepV)) 
+        return stepV;
+    }
+    return null;
   }
 }

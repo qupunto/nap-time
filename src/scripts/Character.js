@@ -99,18 +99,30 @@ export class Character {
       this.states.add(CONSTANTS.CHARACTER_STATES.SLAMMING);
     }
     if (this.states.has(CONSTANTS.CHARACTER_STATES.CROUCHING)) {
-      // this.states.delete(CONSTANTS.CHARACTER_STATES.CROUCHING);
-      // this.states.delete(CONSTANTS.CHARACTER_STATES.GROUNDED);
       this.states.add(CONSTANTS.CHARACTER_STATES.DROPPING);
     }
     if (this.states.has(CONSTANTS.CHARACTER_STATES.GROUNDED)) {
       this.states.add(CONSTANTS.CHARACTER_STATES.CROUCHING);
+    }
+    if(this.is_gripping){
+      this.states.delete(CONSTANTS.CHARACTER_STATES.GRIPPING_LEFT);
+      this.states.delete(CONSTANTS.CHARACTER_STATES.GRIPPING_RIGHT);
+      this.states.add(CONSTANTS.CHARACTER_STATES.FALLING);
+      clearTimeout(this.gripping_timeout);
+      this.gripping_timeout = null;
     }
   }
   keydownLeft() {
     this.#states__not_idle();
     if(this.states.has(CONSTANTS.CHARACTER_STATES.GRIPPING_LEFT))
       return;
+    if(this.states.has(CONSTANTS.CHARACTER_STATES.GRIPPING_RIGHT)){
+      this.states.delete(CONSTANTS.CHARACTER_STATES.GRIPPING_RIGHT);
+      this.states.add(CONSTANTS.CHARACTER_STATES.IMPULSING_LEFT);
+      this.states.add(CONSTANTS.CHARACTER_STATES.FALLING);
+      clearTimeout(this.gripping_timeout);
+      this.gripping_timeout = null;
+    }
     this.states.add(CONSTANTS.CHARACTER_STATES.MOVING_LEFT);
     this.states.delete(CONSTANTS.CHARACTER_STATES.MOVING_RIGHT);
     this.states.delete(CONSTANTS.CHARACTER_STATES.GRIPPING_RIGHT);
@@ -123,6 +135,13 @@ export class Character {
     this.#states__not_idle();
     if(this.states.has(CONSTANTS.CHARACTER_STATES.GRIPPING_RIGHT))
       return;
+    if(this.states.has(CONSTANTS.CHARACTER_STATES.GRIPPING_LEFT)){
+      this.states.delete(CONSTANTS.CHARACTER_STATES.GRIPPING_LEFT);
+      this.states.add(CONSTANTS.CHARACTER_STATES.IMPULSING_RIGHT);
+      this.states.add(CONSTANTS.CHARACTER_STATES.FALLING);
+      clearTimeout(this.gripping_timeout);
+      this.gripping_timeout = null;
+    }
     this.states.add(CONSTANTS.CHARACTER_STATES.MOVING_RIGHT);
     this.states.delete(CONSTANTS.CHARACTER_STATES.MOVING_LEFT);
     this.states.delete(CONSTANTS.CHARACTER_STATES.GRIPPING_LEFT);
@@ -133,12 +152,14 @@ export class Character {
   }
   keyupLeft() {
     this.states.add(CONSTANTS.CHARACTER_STATES.WAITING_KEYPRESS_LEFT);
+    this.states.delete(CONSTANTS.CHARACTER_STATES.MOVING_LEFT);
     setTimeout(() => {
       this.states.delete(CONSTANTS.CHARACTER_STATES.WAITING_KEYPRESS_LEFT);
     }, GAME.PARAMETERS.DASH_THRESHHOLD_MS);
   }
   keyupRight() {
     this.states.add(CONSTANTS.CHARACTER_STATES.WAITING_KEYPRESS_RIGHT);
+    this.states.delete(CONSTANTS.CHARACTER_STATES.MOVING_RIGHT);
     setTimeout(() => {
       this.states.delete(CONSTANTS.CHARACTER_STATES.WAITING_KEYPRESS_RIGHT);
     }, GAME.PARAMETERS.DASH_THRESHHOLD_MS);
@@ -160,12 +181,10 @@ export class Character {
     else if (this.states.has(CONSTANTS.CHARACTER_STATES.DASHING_LEFT)) {
       this.velocity.x = -this.DASHING_DISTANCE;
       this.states.delete(CONSTANTS.CHARACTER_STATES.DASHING_LEFT);
-      // this.states.add(CONSTANTS.CHARACTER_STATES.MOVING_LEFT);
     }
     else if (this.states.has(CONSTANTS.CHARACTER_STATES.DASHING_RIGHT)) {
       this.velocity.x = this.DASHING_DISTANCE;
       this.states.delete(CONSTANTS.CHARACTER_STATES.DASHING_RIGHT);
-      // this.states.add(CONSTANTS.CHARACTER_STATES.MOVING_RIGHT);
     }
     else if (this.states.has(CONSTANTS.CHARACTER_STATES.MOVING_LEFT)) {
       if (this.velocity.x < -this.MAX_VELOCITY) {
@@ -271,41 +290,34 @@ export class Character {
       this.HEIGHT
     );
 
-    let move = obstacles.size === 0;
-
     obstacles.forEach((obstacle) => {
-      switch (hitBox.contains({ x: this.velocity.x, y: -this.velocity.y }, obstacle)) {
+      switch (hitBox.collides(obstacle,{ x: this.velocity.x, y: -this.velocity.y })) {
         case CONSTANTS.COLLISION.RIGHT:
+          console.log("COLLISION RIGHT")
           if (this.is_airborne)
             this.#states__gripping_right();
-          if(this.is_gripping)
-            this.velocity.y = 0;
           this.velocity.x = 0;
           this.position.x = obstacle.START_X - this.SIZE;
-          this.position.y = this.position.rawY - this.velocity.y;
           break;
         case CONSTANTS.COLLISION.LEFT:
+          console.log("COLLISION LEFT")
           if (this.is_airborne)
             this.#states__gripping_left();
-          if(this.is_gripping)
-            this.velocity.y = 0;
           this.velocity.x = 0;
           this.position.x = obstacle.END_X;
-          this.position.y = this.position.rawY - this.velocity.y;
           break;
         case CONSTANTS.COLLISION.TOP:
+          console.log("COLLISION TOP")
           this.velocity.y = 0;
-          this.position.x = this.position.rawX + this.velocity.x;
           this.position.y = obstacle.END_Y;
           break;
         case CONSTANTS.COLLISION.BOTTOM:
+          console.log("COLLISION BOTTOM")
           if (!this.states.has(CONSTANTS.CHARACTER_STATES.DROPPING)) {
             this.velocity.y = 0;
-            this.position.x = this.position.rawX + this.velocity.x;
             this.position.y = obstacle.START_Y - this.SIZE;
             this.#states__grounded();
           } else {
-            move = true;
             this.states.delete(CONSTANTS.CHARACTER_STATES.DROPPING);
             this.states.add(CONSTANTS.CHARACTER_STATES.FALLING);
             this.states.delete(CONSTANTS.CHARACTER_STATES.CROUCHING);
@@ -326,7 +338,6 @@ export class Character {
             this.#states__grounded();
           }
           else {
-            move = true;
             this.states.delete(CONSTANTS.CHARACTER_STATES.DROPPING);
             this.states.add(CONSTANTS.CHARACTER_STATES.FALLING);
           }
@@ -340,7 +351,6 @@ export class Character {
             this.#states__grounded();
           }
           else {
-            move = true;
             this.states.delete(CONSTANTS.CHARACTER_STATES.DROPPING);
             this.states.add(CONSTANTS.CHARACTER_STATES.FALLING);
           }
@@ -352,16 +362,16 @@ export class Character {
           this.position.y = obstacle.END_Y;
           break;
         case CONSTANTS.COLLISION.NONE:
-          move = !this.is_gripping && true;
+          // DO NOTHING
           break;
       }
     })
-    if (move) {
-      if (this.is_airborne)
-        this.#states__falling();
-      this.position.x = this.position.rawX + this.velocity.x;
-      this.position.y = this.position.rawY - this.velocity.y;
-    }
+    if (this.is_airborne)
+      this.#states__falling();
+    if(this.is_gripping)
+      this.velocity.y = 0;
+    this.position.x = this.position.rawX + this.velocity.x;
+    this.position.y = this.position.rawY - this.velocity.y;
   }
   #updateIdleAnimation() {
     if(this.idle_timeout === null &&
@@ -449,7 +459,6 @@ export class Character {
           if (this.states.has(CONSTANTS.CHARACTER_STATES.GRIPPING_LEFT)) {
             this.states.delete(CONSTANTS.CHARACTER_STATES.GRIPPING_LEFT);
             this.states.add(CONSTANTS.CHARACTER_STATES.FALLING);
-            this.states.add(CONSTANTS.CHARACTER_STATES.IMPULSING_RIGHT);
           }
           clearTimeout(this.gripping_timeout);
           this.gripping_timeout = null;
@@ -467,7 +476,6 @@ export class Character {
           if (this.states.has(CONSTANTS.CHARACTER_STATES.GRIPPING_RIGHT)) {
             this.states.delete(CONSTANTS.CHARACTER_STATES.GRIPPING_RIGHT);
             this.states.add(CONSTANTS.CHARACTER_STATES.FALLING);
-            this.states.add(CONSTANTS.CHARACTER_STATES.IMPULSING_LEFT);
           }
           clearTimeout(this.gripping_timeout);
           this.gripping_timeout = null;
