@@ -21,7 +21,7 @@ export class CollisionBox {
     const n = Math.abs(v.x) > Math.abs(v.y) ? Math.abs(Math.trunc(v.x / GAME.SYSTEM.VELOCITY_STEPS_PX))+1 : Math.abs(Math.trunc(v.y / GAME.SYSTEM.VELOCITY_STEPS_PX))+1;
     const stepX = v.x / n;
     const stepY = v.y / n;
-    for (let i = 1; i <= n; i++) {
+    for (let i = 0; i <= n; i++) {
       const stepV = { x: stepX * i, y: stepY * i }
       if (this.contains(box, stepV)) 
         return stepV;

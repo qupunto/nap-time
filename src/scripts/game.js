@@ -1,6 +1,6 @@
 ﻿import { Character } from "./Character.js";
 import { Animal } from "./Animal.js";
-import { GAME } from "./constants.js";
+import { CONSTANTS, GAME } from "./constants.js";
 import { ScreenSection } from "./ScreenSection.js";
 import { SolidRectangle } from "./SolidRectangle.js";
 
@@ -19,11 +19,20 @@ export class Game {
     this.screenSections = [];
     this.#assignScreenSections();
     this.drops = [];
+    // this.character = new Character(
+    //   animal,
+    //   this.boundaries,
+    //   {x: this.boundaries.START_X + this.boundaries.WIDTH / 2 - animal.SIZE * this.SIZE_RATIO,
+    //     y:this.boundaries.HEIGHT - animal.SIZE * this.SIZE_RATIO,
+    //   }
+    // );
+    const states = new Set([CONSTANTS.CHARACTER_STATES.GROUNDED, CONSTANTS.CHARACTER_STATES.MOVING_LEFT, CONSTANTS.CHARACTER_STATES.CROUCHING, CONSTANTS.CHARACTER_STATES.DASHING_LEFT]);
     this.character = new Character(
       animal,
-      this.boundaries.START_X + this.boundaries.WIDTH / 2 - animal.SIZE * this.SIZE_RATIO,
-      this.boundaries.HEIGHT - animal.SIZE * this.SIZE_RATIO,
-      this.boundaries
+      this.boundaries,
+      {x: 195,y:750},
+      states,
+      {x:-10,y:0}
     );
     // New accumulator for the fixed timestep
     this.accumulator = 0;
@@ -158,9 +167,9 @@ export class Game {
     );
     this.backgroundTerrain.push(
       new SolidRectangle(
-        this.boundaries.END_X -10 * this.SIZE_RATIO,
+        this.boundaries.END_X -20 * this.SIZE_RATIO,
         this.boundaries.START_Y + 100 * this.SIZE_RATIO,
-        10*this.SIZE_RATIO,
+        20*this.SIZE_RATIO,
         this.boundaries.HEIGHT - 100 * this.SIZE_RATIO,
         {
           fillStyle: "brown",
@@ -171,7 +180,7 @@ export class Game {
       new SolidRectangle(
         this.boundaries.START_X,
         this.boundaries.START_Y + 100 * this.SIZE_RATIO,
-        10*this.SIZE_RATIO,
+        20*this.SIZE_RATIO,
         this.boundaries.HEIGHT - 100 * this.SIZE_RATIO,
         {
           fillStyle: "brown",

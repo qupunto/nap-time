@@ -54,7 +54,6 @@ export const CONSTANTS = Object.freeze({
     GRIPPING_RIGHT: "gripping_right",
     MOVING_LEFT: "moving_left",
     MOVING_RIGHT: "moving_right",
-    CROUCHED: "crouched",
     JUMPING: "jumping",
     DOUBLE_JUMPING: "double_jumping",
     FALLING: "falling",

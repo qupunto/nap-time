@@ -5,7 +5,7 @@ import { applyRatio } from "./helpers.js";
 import { Animal } from "./Animal.js";
 
 export class Character {
-  constructor(animal = new Animal(), initialX, initialY, boundaries) {
+  constructor(animal = new Animal(),boundaries, position ={x:0,y:0}, states = new Set([CONSTANTS.CHARACTER_STATES.GROUNDED]), velocity = {x: 0 ,y:0} ) {
     const self = this;
     this.BOUNDARIES = boundaries;
     this.RESIZE_RATIO = this.BOUNDARIES.WIDTH / GAME.SCREEN.WIDTH;
@@ -13,8 +13,8 @@ export class Character {
     this._width = this.SIZE;
     this._height = this.SIZE;
     this.position = {
-      _x: initialX,
-      _y: initialY,
+      _x: position.x,
+      _y: position.y,
       get rawX(){
         return this._x;
       },
@@ -34,8 +34,8 @@ export class Character {
         this._y = val;
       }
     }
-    this.states = new Set([CONSTANTS.CHARACTER_STATES.GROUNDED]);
-    this.velocity = { x: 0, y: 0 };
+    this.states = states;
+    this.velocity = velocity;
     this.idle_timeout = null;
     this.gripping_timeout = null;
   }
@@ -293,26 +293,29 @@ export class Character {
     obstacles.forEach((obstacle) => {
       switch (hitBox.collides(obstacle,{ x: this.velocity.x, y: -this.velocity.y })) {
         case CONSTANTS.COLLISION.RIGHT:
-          console.log("COLLISION RIGHT")
+          console.log("CONSTANTS.COLLISION.RIGHT");
           if (this.is_airborne)
             this.#states__gripping_right();
           this.velocity.x = 0;
           this.position.x = obstacle.START_X - this.SIZE;
+          this.states.delete(CONSTANTS.CHARACTER_STATES.MOVING_RIGHT);
           break;
         case CONSTANTS.COLLISION.LEFT:
-          console.log("COLLISION LEFT")
+          console.log("CONSTANTS.COLLISION.LEFT");
           if (this.is_airborne)
             this.#states__gripping_left();
           this.velocity.x = 0;
           this.position.x = obstacle.END_X;
+          this.states.delete(CONSTANTS.CHARACTER_STATES.MOVING_LEFT);
           break;
         case CONSTANTS.COLLISION.TOP:
-          console.log("COLLISION TOP")
+          console.log("CONSTANTS.COLLISION.TOP");
           this.velocity.y = 0;
           this.position.y = obstacle.END_Y;
+          this.states.add(CONSTANTS.CHARACTER_STATES.FALLING);
           break;
         case CONSTANTS.COLLISION.BOTTOM:
-          console.log("COLLISION BOTTOM")
+          console.log("CONSTANTS.COLLISION.BOTTOM");
           if (!this.states.has(CONSTANTS.CHARACTER_STATES.DROPPING)) {
             this.velocity.y = 0;
             this.position.y = obstacle.START_Y - this.SIZE;
@@ -323,18 +326,14 @@ export class Character {
             this.states.delete(CONSTANTS.CHARACTER_STATES.CROUCHING);
           }
           break;
-        case CONSTANTS.COLLISION.CORNER_TOP_RIGHT:
-          this.velocity.x = 0;
-          this.velocity.y = 0;
-          this.position.x = obstacle.START_X - this.SIZE;
-          this.position.y = obstacle.END_Y;
-          break;
         case CONSTANTS.COLLISION.CORNER_BOTTOM_RIGHT:
+          console.log("CONSTANTS.COLLISION.CORNER_BOTTOM_RIGHT");
           if (!this.states.has(CONSTANTS.CHARACTER_STATES.DROPPING)) {
             this.velocity.x = 0;
             this.velocity.y = 0;
             this.position.x = obstacle.START_X - this.SIZE;
             this.position.y = obstacle.START_Y - this.SIZE;
+            this.states.add(CONSTANTS.CHARACTER_STATES.MOVING_RIGHT);
             this.#states__grounded();
           }
           else {
@@ -343,11 +342,13 @@ export class Character {
           }
           break;
         case CONSTANTS.COLLISION.CORNER_BOTTOM_LEFT:
+          console.log("CONSTANTS.COLLISION.CORNER_BOTTOM_LEFT");
           if (!this.states.has(CONSTANTS.CHARACTER_STATES.DROPPING)) {
             this.velocity.x = 0;
             this.velocity.y = 0;
             this.position.x = obstacle.END_X;
             this.position.y = obstacle.START_Y - this.SIZE;
+            this.states.add(CONSTANTS.CHARACTER_STATES.MOVING_LEFT);
             this.#states__grounded();
           }
           else {
@@ -356,10 +357,20 @@ export class Character {
           }
           break;
         case CONSTANTS.COLLISION.CORNER_TOP_LEFT:
+          console.log("CONSTANTS.COLLISION.CORNER_TOP_LEFT");
           this.velocity.x = 0;
           this.velocity.y = 0;
           this.position.x = obstacle.END_X;
           this.position.y = obstacle.END_Y;
+          this.states.add(CONSTANTS.CHARACTER_STATES.MOVING_LEFT);
+          break;
+        case CONSTANTS.COLLISION.CORNER_TOP_RIGHT:
+          console.log("CONSTANTS.COLLISION.CORNER_TOP_RIGHT");
+          this.velocity.x = 0;
+          this.velocity.y = 0;
+          this.position.x = obstacle.START_X - this.SIZE;
+          this.position.y = obstacle.END_Y;
+          this.states.add(CONSTANTS.CHARACTER_STATES.MOVING_RIGHT);
           break;
         case CONSTANTS.COLLISION.NONE:
           // DO NOTHING
@@ -376,7 +387,7 @@ export class Character {
   #updateIdleAnimation() {
     if(this.idle_timeout === null &&
        this.states.has(CONSTANTS.CHARACTER_STATES.GROUNDED) &&
-    (this.states.size === 1 || this.states.has(CONSTANTS.CHARACTER_STATES.CROUCHED) && this.states.size === 2)){
+    (this.states.size === 1 || this.states.has(CONSTANTS.CHARACTER_STATES.CROUCHING) && this.states.size === 2)){
       this.idle_timeout = setTimeout(() => {
         this.#states__idle();
         clearTimeout(this.idle_timeout);
