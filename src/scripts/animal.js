@@ -9,5 +9,6 @@ export class Animal {
         this.SIZE = size;
         this.JUMPING_POWER = jumpingPower;
         this.DASHING_DISTANCE = dashingDistance;
+        this.SLAMMING_POWER = this.SIZE / 10 * this.MAX_VELOCITY;
     }
 }

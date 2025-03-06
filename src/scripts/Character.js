@@ -41,7 +41,8 @@ export class Character {
   }
   update(terrain = new Set()) {
     this.#computeMovement();
-    this.#resolveCollisions(terrain);
+    const collisions = this.#resolveCollisions(terrain);
+    console.log(collisions);
     this.#stayInBoundaries();
     this.#updateIdleAnimation();
   }
@@ -237,36 +238,11 @@ export class Character {
     }
     else if (this.states.has(CONSTANTS.CHARACTER_STATES.SLAMMING)) {
       this.states.delete(CONSTANTS.CHARACTER_STATES.SLAMMING);
-      this.velocity.y = -this.MAX_VELOCITY * this.SIZE / 10;
+      this.velocity.y = -this.SLAMMING_POWER;
     }
     else {
       // GRAVITY
       this.velocity.y -= GAME.PARAMETERS.GRAVITY * this.RESIZE_RATIO;
-    }
-  }
-  #stayInBoundaries() {
-    if (this.position.x + this.velocity.x <= this.BOUNDARIES.START_X) {
-      //LEFT COLLISION
-      this.velocity.x = 0;
-      this.position.x = this.BOUNDARIES.START_X;
-      this.states.delete(CONSTANTS.CHARACTER_STATES.MOVING_LEFT);
-    }
-    if (this.position.x + this.velocity.x + this.WIDTH >= this.BOUNDARIES.END_X) {
-      //RIGHT COLLISION
-      this.velocity.x = 0;
-      this.position.x = this.BOUNDARIES.END_X - this.WIDTH;
-      this.states.delete(CONSTANTS.CHARACTER_STATES.MOVING_RIGHT);
-    }
-    if (this.position.y - this.velocity.y + this.HEIGHT >= this.BOUNDARIES.END_Y) {
-      //BOTTOM COLLISION
-      this.velocity.y = 0;
-      this.position.y = this.BOUNDARIES.END_Y - this.SIZE;
-      this.#states__grounded();
-    }
-    if (this.position.y - this.velocity.y <= this.BOUNDARIES.START_Y) {
-      //TOP COLLISION
-      this.velocity.y = 0;
-      this.position.y = this.BOUNDARIES.START_Y;
     }
   }
   #resolveCollisions(obstacles = new Set()) {
@@ -289,9 +265,11 @@ export class Character {
       this.WIDTH,
       this.HEIGHT
     );
-
+    const dir = new Set();
     obstacles.forEach((obstacle) => {
-      switch (hitBox.collides(obstacle,{ x: this.velocity.x, y: -this.velocity.y })) {
+      const col = hitBox.collides(obstacle,{ x: this.velocity.x, y: -this.velocity.y });
+      dir.add(col);
+      switch (col) {
         case CONSTANTS.COLLISION.RIGHT:
           console.log("CONSTANTS.COLLISION.RIGHT");
           if (this.is_airborne)
@@ -383,6 +361,31 @@ export class Character {
       this.velocity.y = 0;
     this.position.x = this.position.rawX + this.velocity.x;
     this.position.y = this.position.rawY - this.velocity.y;
+  }
+  #stayInBoundaries() {
+    if (this.position.x <= this.BOUNDARIES.START_X) {
+      //LEFT COLLISION
+      this.velocity.x = 0;
+      this.position.x = this.BOUNDARIES.START_X;
+      this.states.delete(CONSTANTS.CHARACTER_STATES.MOVING_LEFT);
+    }
+    if (this.position.x + this.WIDTH >= this.BOUNDARIES.END_X) {
+      //RIGHT COLLISION
+      this.velocity.x = 0;
+      this.position.x = this.BOUNDARIES.END_X - this.WIDTH;
+      this.states.delete(CONSTANTS.CHARACTER_STATES.MOVING_RIGHT);
+    }
+    if (this.position.y + this.HEIGHT >= this.BOUNDARIES.END_Y) {
+      //BOTTOM COLLISION
+      this.velocity.y = 0;
+      this.position.y = this.BOUNDARIES.END_Y - this.SIZE;
+      this.#states__grounded();
+    }
+    if (this.position.y <= this.BOUNDARIES.START_Y) {
+      //TOP COLLISION
+      this.velocity.y = 0;
+      this.position.y = this.BOUNDARIES.START_Y;
+    }
   }
   #updateIdleAnimation() {
     if(this.idle_timeout === null &&

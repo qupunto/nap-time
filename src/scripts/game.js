@@ -30,7 +30,7 @@ export class Game {
     this.character = new Character(
       animal,
       this.boundaries,
-      {x: 195,y:750},
+      {x: this.boundaries.START_X + this.boundaries.WIDTH/2 -animal.SIZE ,y:this.boundaries.END_Y - animal.SIZE},
       states,
       {x:-10,y:0}
     );
@@ -125,7 +125,7 @@ export class Game {
       new SolidRectangle(
         this.boundaries.START_X,
         this.boundaries.END_Y - 200 * this.SIZE_RATIO,
-        400 * this.SIZE_RATIO,
+        360 * this.SIZE_RATIO,
         200 * this.SIZE_RATIO,
         {
           fillStyle: "darkgrey",
@@ -169,7 +169,7 @@ export class Game {
       new SolidRectangle(
         this.boundaries.END_X -20 * this.SIZE_RATIO,
         this.boundaries.START_Y + 100 * this.SIZE_RATIO,
-        20*this.SIZE_RATIO,
+        5*this.SIZE_RATIO,
         this.boundaries.HEIGHT - 100 * this.SIZE_RATIO,
         {
           fillStyle: "brown",
@@ -180,7 +180,7 @@ export class Game {
       new SolidRectangle(
         this.boundaries.START_X,
         this.boundaries.START_Y + 100 * this.SIZE_RATIO,
-        20*this.SIZE_RATIO,
+        5*this.SIZE_RATIO,
         this.boundaries.HEIGHT - 100 * this.SIZE_RATIO,
         {
           fillStyle: "brown",
@@ -294,10 +294,10 @@ export class Game {
   #getNearbyTerrain() {
     const SECTION_WIDTH = this.boundaries.WIDTH / 16;
     const SECTION_HEIGHT = this.boundaries.HEIGHT / 9;
-    const SECTION_START_X = Math.trunc((this.character.position.x - this.character.velocity.x - this.boundaries.START_X) / SECTION_WIDTH);
-    const SECTION_START_Y = Math.trunc((this.character.position.y - this.character.velocity.y - this.boundaries.START_Y) / SECTION_HEIGHT);
-    const SECTION_END_X = Math.trunc((this.character.position.x + this.character.WIDTH + this.character.velocity.x - this.boundaries.START_X) / SECTION_WIDTH);
-    const SECTION_END_Y = Math.trunc((this.character.position.y + this.character.HEIGHT - this.character.velocity.y - this.boundaries.START_Y) / SECTION_HEIGHT);
+    const SECTION_START_X = Math.max(0, Math.trunc((this.character.position.x + this.character.velocity.x - this.boundaries.START_X - this.character.MAX_VELOCITY) / SECTION_WIDTH));
+    const SECTION_START_Y = Math.max(0, Math.trunc((this.character.position.y - this.character.velocity.y - this.boundaries.START_Y - this.character.JUMPING_POWER) / SECTION_HEIGHT));
+    const SECTION_END_X = Math.min(15, Math.trunc((this.character.position.x + this.character.WIDTH + this.character.velocity.x - this.boundaries.START_X + this.character.MAX_VELOCITY) / SECTION_WIDTH));
+    const SECTION_END_Y = Math.min(8, Math.trunc((this.character.position.y + this.character.HEIGHT - this.character.velocity.y - this.boundaries.START_Y + this.character.SLAMMING_POWER ) / SECTION_HEIGHT));
 
     const ids = new Set();
     ids.add(getId(SECTION_START_X, SECTION_START_Y));

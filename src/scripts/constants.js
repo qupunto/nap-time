@@ -23,7 +23,7 @@ export const GAME  = Object.freeze({
     MIN_HEIGHT: 360,
     MIN_WIDTH: 480,
     WIDTH: 1920,
-    HEIGHT: 1080
+    HEIGHT: 1080,
   },
   STATES: {
     SELECTING: "selecting",
@@ -78,10 +78,10 @@ export const CONSTANTS = Object.freeze({
     RIGHT: "collision_right",
     FRONT: "collision_front",
     BACK: "collision_back",
-    CORNER_TOP_RIGHT: "collision_corner_top_right",
-    CORNER_BOTTOM_RIGHT: "collision_corner_bottom_right",
-    CORNER_TOP_LEFT: "collision_corner_top_left",
-    CORNER_BOTTOM_LEFT: "collision_corner_bottom_left",
+    TOP_RIGHT: "collision_top_right",
+    BOTTOM_RIGHT: "collision_bottom_right",
+    TOP_LEFT: "collision_top_left",
+    BOTTOM_LEFT: "collision_bottom_left",
     NONE: "collision_none",
   },
   DIRECTION: {
